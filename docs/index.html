@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Work schedule</title>
+    <style>
+        body {
+            font-family: monospace;
+            display: flex;
+            justify-content: center;
+        }
+        #app {
+        }
+
+        .pay-period {
+            padding-bottom: 2em;
+        }
+
+        .summary {
+            margin-bottom: .4em;
+        }
+
+        .daysContainer {
+          display: grid;
+          grid-template-columns: repeat(7, 1fr);
+          grid-gap: 10px;
+          background-color: #fff;
+          color: #444;
+        }
+
+        .month {
+            margin-top: 1em;
+            font-size: 150%;
+        }
+
+        .day {
+          background-color: #444;
+          color: #fff;
+          border-radius: 5px;
+          text-align: center;
+          font-size: 150%;
+          padding: .4em;
+        }
+
+        @media (min-width: 600px) {
+            .day  {
+              padding: 1em;
+            }
+        }
+
+        @media min-width: 600px {
+            .day  {
+              padding: 1em;
+            }
+        }
+
+        .today {
+            background-color: black;
+        }
+
+        .weekend {
+          background-color: #4DB6AC;
+        }
+
+        .off-friday {
+          background-color: #5599bb;
+        }
+
+        .holiday {
+          background-color: #ffcc55;
+        }
+
+        .context {
+          background-color: #f0f0f0;
+        }
+
+    </style>
+  </head>
+  <body>
+    <noscript>
+      <strong>Sadly this site uses javascript :D</strong>
+    </noscript>
+    <div id="app"></div>
+
+    <script>
+// Date
+Date.prototype.copy = function() {
+    return new Date(this.valueOf());
+}
+
+Date.prototype.advance = function(days = 1) {
+    this.setDate(this.getDate() + days);
+    return this;
+}
+
+Date.prototype.nextDay = function() {
+    return this.copy().advance();
+}
+
+Date.prototype.daysUntil = function(d) {
+    const oneDay = 1000 * 60 * 60 * 24
+    return Math.round(Math.abs(this - d) / oneDay);
+}
+
+Date.prototype.equals = function(d) {
+    return this.toDateString() === d.toDateString();
+}
+
+// Sunday = 0, Monday = 1, ... Saturday = 6
+Date.prototype.toNextDay = function(day) {
+    const newDay = this.copy();
+    newDay.setDate(newDay.getDate() + (7 + day - newDay.getDay()) % 7);  // TIL: modulo in javascript keeps negative numbers...
+    return newDay;
+}
+
+Date.prototype.toPrevDay = function(day) {
+    const newDay = this.copy();
+    const offset = 7 - day;
+    newDay.setDate(newDay.getDate() - (newDay.getDay() + offset) % 7);
+    return newDay;
+}
+
+Date.prototype.nextFriday = function() {
+    return this.toNextDay(5);
+}
+
+Date.prototype.nextSunday = function() {
+    return this.toNextDay(0);
+}
+
+Date.prototype.prevMonday = function() {
+    return this.toPrevDay(1);
+}
+
+
+// Models
+function Payroll(middleDate) {
+    this.middleDate = middleDate,
+    this.start = this._start(),
+    this.end = this._end()
+}
+
+Payroll.prototype._start = function() {
+    const d = this.middleDate;
+    const year = d.getFullYear();
+    const month = d.getMonth();
+    const day = d.getDate();
+    const start = day < 16 ? 1 : 16;
+    return new Date(year, month, start);
+}
+
+Payroll.prototype._end = function() {
+    const d = this.middleDate;
+    const year = d.getFullYear();
+    const month = d.getMonth();
+    const day = d.getDate();
+
+    const end = day < 16 ?
+            new Date(year, month, 15) :
+            new Date(year, month+1, 0);
+    return end;
+}
+
+Payroll.prototype.nextPayroll = function() {
+    return new Payroll(this.end.nextDay());
+}
+
+const holidays = new Set([
+    new Date(2021, 0, 1),
+    new Date(2021, 0, 18),
+    new Date(2021, 1, 15),
+    new Date(2021, 4, 31),
+    new Date(2021, 6, 5),
+    new Date(2021, 8, 6),
+    new Date(2021, 10, 11),
+    new Date(2021, 10, 25),
+    new Date(2021, 10, 26),
+    new Date(2021, 11, 24),
+    new Date(2021, 11, 27),
+].map(d => d.toDateString()));
+
+function isHoliday(d) {
+    if (holidays.has(d.toDateString())) {
+        return true;
+    }
+    return false;
+}
+
+function isObservedOffFriday(d) {
+    return (isOffFriday(d) && !isHoliday(d)) || dayBeforeHolidayStreak(d);
+}
+
+function dayBeforeHolidayStreak(d) {
+    const friday = d.nextFriday();
+
+    // next friday is off friday
+    if (!isOffFriday(friday)) {
+        return false;
+    }
+
+    // all the days leading up to it are holidays
+    let i = d.nextDay();
+    while (i <= friday) {
+        if (!isHoliday(i)) {
+            return false;
+        }
+        i.advance();
+    }
+    return true;
+}
+
+function isOffFriday(d) {
+    const anOffFriday = new Date(2021, 1, 19);
+    return d.daysUntil(anOffFriday) % 14 === 0;
+}
+
+function isToday(d) {
+    return d.equals(new Date());
+}
+
+
+// Render
+function addDiv(container, className) {
+    const newDiv = document.createElement("div");
+    newDiv.className = className;
+    container.appendChild(newDiv);
+    return newDiv;
+}
+
+const app = document.getElementById('app');
+
+function period(payroll) {
+    const d = document.createElement("div");
+    d.className = "date-range";
+    d.innerHTML = `Payroll: ${payroll.start.toLocaleDateString("en-US")} &ndash; ${payroll.end.toLocaleDateString("en-US")}`;
+    return d;
+}
+
+function day(d, payroll) {
+    const el = document.createElement("div");
+    el.className = "day";
+
+    if (d.getDay() == 0 || d.getDay() == 6) {
+        el.classList.add("weekend");
+    }
+
+    if (d < payroll.start || d > payroll.end) {
+        el.classList.add("context");
+    }
+
+    if (isHoliday(d)) {
+        el.classList.add("holiday");
+    }
+
+    if (isToday(d)) {
+        el.classList.add("today");
+    }
+
+    if (isObservedOffFriday(d)) {
+        el.classList.add("off-friday");
+    }
+
+    el.innerHTML = d.getDate();
+    return el;
+}
+
+function stats(payroll) {
+    const stats = {
+        hours: 0,
+        days: 0,
+    };
+    let i = payroll.start.copy();
+    while (i <= payroll.end) {
+        if (i.getDay() > 0 && i.getDay() < 6 && !isHoliday(i)) {
+            stats.hours += 8;
+            if (!isObservedOffFriday(i)) {
+                stats.days += 1;
+            }
+        }
+        i.advance();
+    }
+    let avgHours = stats.hours / stats.days;
+
+    const statsDiv = document.createElement("div");
+    statsDiv.className = "stats";
+
+    const hoursDiv = document.createElement("div");
+    hoursDiv.className = "hours";
+    hoursDiv.innerHTML = `Hours: ${stats.hours} (${avgHours.toFixed(2)}/day)`;
+    statsDiv.appendChild(hoursDiv);
+
+    return statsDiv;
+}
+
+function drawSummary(root, payroll) {
+    const summary = document.createElement("div");
+    summary.className = "summary";
+    summary.appendChild(period(payroll));
+    summary.appendChild(stats(payroll));
+    root.appendChild(summary);
+};
+
+function drawPayPeriod(root, payroll) {
+    const today = new Date();
+    const weekStart = payroll.start.prevMonday();
+    const weekEnd = payroll.end.nextSunday();
+
+    const payPeriod = document.createElement("div");
+    payPeriod.className = "pay-period";
+    root.appendChild(payPeriod);
+
+    if (payroll.start.getDate() === 1) {
+        const month = addDiv(payPeriod, "month");
+        const monthName = payroll.start.toLocaleString("default", {month: "long"});
+        month.innerHTML = `${monthName}`;
+    }
+
+    drawSummary(payPeriod, payroll);
+
+    const daysContainer = document.createElement("div");
+    daysContainer.className = "daysContainer";
+    payPeriod.appendChild(daysContainer);
+
+    let i = weekStart.copy();
+    while (i <= weekEnd) {
+        const d = day(i, payroll);
+        daysContainer.appendChild(d);
+
+        i.advance();
+    }
+}
+
+function drawCurrentPayPeriod(app) {
+    let payroll = new Payroll(new Date());
+    while (payroll.start.getFullYear() == 2021) {
+        drawPayPeriod(app, payroll);
+        payroll = payroll.nextPayroll();
+    }
+}
+
+drawCurrentPayPeriod(app);
+    </script>
+  </body>
+</html>
