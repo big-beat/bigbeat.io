@@ -6,8 +6,74 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Work schedule</title>
     <style>
+        /* colors shared across dark and light mode */
+        :root {
+            --weekend-background-color: #4db6ac;
+            --off-friday-background-color: #5599bb;
+        }
+
+        :root[data-theme='light'] {
+            --color: #000;
+            --background-color: #fff;
+            --days-color: #fff;
+            --days-background-color: #444;
+            --holiday-background-color: #ffcc55;
+            --context-color: var(--days-color);
+            --context-background-color: #f0f0f0;
+            --github-ribbon-color: #fff;
+            --github-ribbon-background-color: #121621;
+        }
+
+        :root[data-theme='dark'] {
+            --color: #fff;
+            --background-color: #222;
+            --days-color: #ddd;
+            --days-background-color: #555;
+            --holiday-background-color: #c49321;
+            --context-color: #666;
+            --context-background-color: #191919;
+            --github-ribbon-color: #000;
+            --github-ribbon-background-color: #ccc;
+        }
+        :root[data-theme="light"] .light-hidden {
+            display: none;
+        }
+
+        :root[data-theme="dark"] .dark-hidden {
+            display: none;
+        }
+
         body {
+            background-color: var(--background-color);
+            color: var(--color);
             font-family: monospace;
+            margin: 0;
+            transition: color .2s ease-in, background-color .2s ease-in;
+        }
+
+        header {
+            margin: .2em;
+            margin-bottom: .8em;
+        }
+
+        header .icon {
+            height: 1.5em;
+            width: 1.5em;
+            cursor: pointer;
+            filter: brightness(80%);
+            filter: opacity(80%);
+        }
+        header .icon:hover {
+            filter: opacity(100%);
+            filter: brightness(100%);
+        }
+
+        #moon {
+            width: 1.5em;
+            height: 1.5em;
+        }
+
+        #app-container {
             display: flex;
             justify-content: center;
         }
@@ -24,25 +90,29 @@
         }
 
         .daysContainer {
-          display: grid;
-          grid-template-columns: repeat(7, 1fr);
-          grid-gap: 10px;
-          background-color: #fff;
-          color: #444;
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            grid-gap: 10px;
+            background-color: var(--background-color);
+            transition: color .2s ease-in, background-color .2s ease-in;
         }
 
         .month {
-            margin-top: 1em;
             font-size: 150%;
         }
 
+        .pay-period:not(:first-child) .month {
+            margin-top: 1em;
+        }
+
         .day {
-          background-color: #444;
-          color: #fff;
-          border-radius: 5px;
-          text-align: center;
-          font-size: 150%;
-          padding: .4em;
+            color: var(--days-color);
+            background-color: var(--days-background-color);
+            border-radius: 5px;
+            text-align: center;
+            font-size: 150%;
+            padding: .4em;
+            transition: color .2s ease-in, background-color .2s ease-in;
         }
 
         @media (min-width: 600px) {
@@ -52,23 +122,28 @@
         }
 
         .today {
-            background-color: black;
+            font-weight: bold;
         }
 
         .weekend {
-          background-color: #4DB6AC;
+            background-color: var(--weekend-background-color);
+            transition: color .2s ease-in, background-color .2s ease-in;
         }
 
         .off-friday {
-          background-color: #5599bb;
+            background-color: var(--off-friday-background-color);
+            transition: color .2s ease-in, background-color .2s ease-in;
         }
 
         .holiday {
-          background-color: #ffcc55;
+            background-color: var(--holiday-background-color);
+            transition: color .2s ease-in, background-color .2s ease-in;
         }
 
         .context {
-          background-color: #f0f0f0;
+            color: var(--context-color);
+            background-color: var(--context-background-color);
+            transition: color .2s ease-in, background-color .2s ease-in;
         }
 
         @media (max-width: 600px) {
@@ -86,15 +161,66 @@
             font-weight: bold;
         }
     </style>
+
+    <script>
+        var storedTheme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        if (storedTheme) {
+            document.documentElement.setAttribute("data-theme", storedTheme)
+        }
+    </script>
   </head>
   <body>
     <noscript>
       <strong>Sadly this site uses javascript :D</strong>
     </noscript>
-    <div class="github-ribbon" style="position: absolute; right: 0px; top: 0px; width: 150px; height: 150px; overflow: hidden; z-index: 99999;"><a target="_blank" style="display: inline-block; width: 200px; overflow: hidden; padding: 6px 0px; text-align: center; transform: rotate(45deg); text-decoration: none; color: rgb(255, 255, 255); position: inherit; top: 45px; right: -40px; font: 700 13px &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; box-shadow: rgba(0, 0, 0, 0.5) 0px 2px 3px 0px; background-color: #121621; background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.15));" href="https://github.com/big-beat/bigbeat.io.git">Fork me on GitHub</a></div></a></div>
-    <div id="app"></div>
 
-    <script>
+    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+        <symbol viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="moon">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </symbol>
+        <symbol viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="sun">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </symbol>
+    </svg>
+
+    <div class="github-ribbon" style="position: absolute; right: 0px; top: 0px; width: 150px; height: 150px; overflow: hidden; z-index: 99999;"><a target="_blank" style="display: inline-block; width: 200px; overflow: hidden; padding: 6px 0px; text-align: center; transform: rotate(45deg); text-decoration: none; color: var(--github-ribbon-color); position: inherit; top: 45px; right: -40px; font: 700 13px &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; box-shadow: rgba(0, 0, 0, 0.5) 0px 2px 3px 0px; background-color: var(--github-ribbon-background-color); background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.15));" href="https://github.com/big-beat/bigbeat.io.git">Fork me on GitHub</a></div></a></div>
+
+    <header>
+        <div aria-hidden="true" id="theme-toggle">
+            <svg class="icon light-hidden">
+                <title>Light Mode</title>
+                <use href="#sun"></use>
+            </svg>
+            <svg class="icon dark-hidden">
+                <title>Dark Mode</title>
+                <use href="#moon"></use>
+            </svg>
+        </div>
+    </header>
+
+    <div id="app-container">
+        <div id="app"></div>
+    </div>
+<script>
+var toggle = document.getElementById("theme-toggle");
+toggle.onclick = function() {
+    var currentTheme = document.documentElement.getAttribute("data-theme");
+    var targetTheme = "light";
+    if (currentTheme === "light") {
+        targetTheme = "dark";
+    }
+    document.documentElement.setAttribute("data-theme", targetTheme)
+    localStorage.setItem("theme", targetTheme);
+};
+
 // Date
 Date.prototype.copy = function() {
     return new Date(this.valueOf());
@@ -342,7 +468,6 @@ function drawPayPeriod(root, payroll) {
     while (i <= weekEnd) {
         const d = day(i, payroll);
         daysContainer.appendChild(d);
-
         i.advance();
     }
 }
