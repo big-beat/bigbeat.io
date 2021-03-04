@@ -137,6 +137,12 @@
             }
         }
 
+        .before-today {
+            font-weight: bold;
+            filter: opacity(70%);
+            transition: color .2s ease-in, background-color .2s ease-in;
+        }
+
         .today {
             font-weight: bold;
         }
@@ -157,6 +163,7 @@
         }
 
         .context {
+            visibility: hidden;
             color: var(--context-color);
             background-color: var(--context-background-color);
             transition: color .2s ease-in, background-color .2s ease-in;
@@ -399,6 +406,11 @@ function isToday(d) {
     return d.equals(new Date());
 }
 
+function isBeforeToday(d) {
+    const today = new Date();
+    return d < today && !d.equals(today);  // lol
+}
+
 
 // Render
 function addDiv(container, className) {
@@ -437,6 +449,10 @@ function day(d, payroll) {
 
     if (isToday(d)) {
         el.classList.add("today");
+    }
+
+    if (isBeforeToday(d)) {
+        el.classList.add("before-today");
     }
 
     if (isObservedOffFriday(d)) {
