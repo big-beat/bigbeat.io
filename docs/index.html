@@ -308,6 +308,24 @@ Payroll.prototype.nextPayroll = function() {
     return new Payroll(this.end.nextDay());
 }
 
+Payroll.prototype.stats = function() {
+    const stats = {
+        hours: 0,
+        days: 0,
+    };
+    let i = this.start.copy();
+    while (i <= this.end) {
+        if (i.getDay() > 0 && i.getDay() < 6 && !isHoliday(i)) {
+            stats.hours += 8;
+            if (!isObservedOffFriday(i)) {
+                stats.days += 1;
+            }
+        }
+        i.advance();
+    }
+    return stats;
+}
+
 const holidays = new Set([
     new Date(2021, 0, 1),
     new Date(2021, 0, 18),
@@ -411,20 +429,7 @@ function day(d, payroll) {
 }
 
 function stats(payroll) {
-    const stats = {
-        hours: 0,
-        days: 0,
-    };
-    let i = payroll.start.copy();
-    while (i <= payroll.end) {
-        if (i.getDay() > 0 && i.getDay() < 6 && !isHoliday(i)) {
-            stats.hours += 8;
-            if (!isObservedOffFriday(i)) {
-                stats.days += 1;
-            }
-        }
-        i.advance();
-    }
+    const stats = payroll.stats();
     let avgHours = stats.hours / stats.days;
 
     const statsDiv = document.createElement("div");
