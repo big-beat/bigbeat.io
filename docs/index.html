@@ -176,6 +176,10 @@
         .stat-name {
             font-weight: bold;
         }
+
+        .high-hours {
+            color: red;
+        }
     </style>
 
     <script>
@@ -447,6 +451,7 @@ function day(d, payroll) {
 function stats(payroll) {
     const stats = payroll.stats();
     let avgHours = stats.hours / stats.days;
+    const highHours = avgHours > 9 ? "high-hours" : "";
 
     const statsDiv = document.createElement("div");
     statsDiv.className = "stats";
@@ -459,7 +464,11 @@ function stats(payroll) {
 
     const hoursDiv = document.createElement("div");
     hoursDiv.className = "hours";
-    hoursDiv.innerHTML = `<span class="stat-name">Hours:</span> ${stats.hours} (${avgHours.toFixed(2)}/day)`;
+    hoursDiv.innerHTML = `
+        <span class="stat-name">Hours:</span>
+        <span class="stat-value">
+            ${stats.hours} (<span class="${highHours}">${avgHours.toFixed(2)}</span>/day)
+        </span>`;
     hoursDiv.setAttribute("title", "Non-holiday hours");
     statsDiv.appendChild(hoursDiv);
 
