@@ -12,6 +12,9 @@
         :root {
             --weekend-background-color: #4db6ac;
             --off-friday-background-color: #5599bb;
+            --today-border-color: orangered;
+            --today-border-thickness: 3px;
+            --day-padding: 1em;
         }
 
         :root[data-theme='light'] {
@@ -43,6 +46,16 @@
 
         :root[data-theme="dark"] .dark-hidden {
             display: none;
+        }
+
+        /* settings unique to smaller screens */
+        @media (max-width: 600px) {
+            :root {
+                --day-padding: .4em;
+            }
+            .github-ribbon {
+                display: none;
+            }
         }
 
         body {
@@ -128,24 +141,18 @@
             border-radius: 5px;
             text-align: center;
             font-size: 150%;
-            padding: .4em;
+            padding: var(--day-padding);
             transition: color .2s ease-in, background-color .2s ease-in;
         }
 
-        @media (min-width: 600px) {
-            .day  {
-              padding: 1em;
-            }
-        }
-
         .before-today {
-            font-weight: bold;
             filter: opacity(70%);
             transition: color .2s ease-in, background-color .2s ease-in;
         }
 
         .today {
-            font-weight: bold;
+            border: var(--today-border-thickness) solid var(--today-border-color);
+            padding: calc(var(--day-padding) - var(--today-border-thickness));
         }
 
         .weekend {
@@ -168,12 +175,6 @@
             color: var(--context-color);
             background-color: var(--context-background-color);
             transition: color .2s ease-in, background-color .2s ease-in;
-        }
-
-        @media (max-width: 600px) {
-            .github-ribbon {
-                display: none;
-            }
         }
 
         .month {
