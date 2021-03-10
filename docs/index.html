@@ -58,6 +58,10 @@
             }
         }
 
+        .hidden {
+            display: none;
+        }
+
         body {
             background-color: var(--background-color);
             color: var(--color);
@@ -74,6 +78,7 @@
 
         header .left, header .right {
             flex-grow: 1;
+            display: flex;
         }
 
         header .center {
@@ -92,6 +97,11 @@
             filter: brightness(80%);
             filter: opacity(80%);
         }
+
+        header .left .button:not(:first-child) {
+            margin-left: 6px;
+        }
+
         header .icon:hover {
             filter: opacity(100%);
             filter: brightness(100%);
@@ -125,6 +135,15 @@
             grid-gap: 10px;
             background-color: var(--background-color);
             transition: color .2s ease-in, background-color .2s ease-in;
+        }
+
+        #legend {
+            max-width: 600px;
+        }
+
+        #legend .daysContainer {
+            grid-template-columns: auto 1fr;
+            align-items: center;
         }
 
         .month {
@@ -192,7 +211,7 @@
     </style>
 
     <script>
-        var storedTheme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        let storedTheme = localStorage.getItem("theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
         if (storedTheme) {
             document.documentElement.setAttribute("data-theme", storedTheme)
         }
@@ -218,13 +237,34 @@
             <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
             <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
         </symbol>
+        <symbol viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="help">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </symbol>
+        <symbol viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="cal">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+        </symbol>
     </svg>
 
     <div class="github-ribbon" style="position: absolute; right: 0px; top: 0px; width: 150px; height: 150px; overflow: hidden; z-index: 99999;"><a target="_blank" style="display: inline-block; width: 200px; overflow: hidden; padding: 6px 0px; text-align: center; transform: rotate(45deg); text-decoration: none; color: var(--github-ribbon-color); position: inherit; top: 45px; right: -40px; font: 700 13px &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; box-shadow: rgba(0, 0, 0, 0.5) 0px 2px 3px 0px; background-color: var(--github-ribbon-background-color); background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.15));" href="https://github.com/big-beat/bigbeat.io.git">Fork me on GitHub</a></div></a></div>
 
     <header>
         <span class="left">
-            <span aria-hidden="true" id="theme-toggle">
+            <span class="button" id="legend-toggle">
+                <svg class="icon">
+                    <title>Legend</title>
+                    <use href="#help"></use>
+                </svg>
+                <svg class="icon hidden">
+                    <title>Calendar</title>
+                    <use href="#cal"></use>
+                </svg>
+            </span>
+            <span aria-hidden="true" class="button" id="theme-toggle">
                 <svg class="icon light-hidden">
                     <title>Light Mode</title>
                     <use href="#sun"></use>
@@ -244,16 +284,33 @@
         <div id="app"></div>
     </div>
 <script>
-var toggle = document.getElementById("theme-toggle");
-toggle.onclick = function() {
-    var currentTheme = document.documentElement.getAttribute("data-theme");
-    var targetTheme = "light";
+let darkToggle = document.getElementById("theme-toggle");
+darkToggle.onclick = function() {
+    let currentTheme = document.documentElement.getAttribute("data-theme");
+    let targetTheme = "light";
     if (currentTheme === "light") {
         targetTheme = "dark";
     }
     document.documentElement.setAttribute("data-theme", targetTheme)
     localStorage.setItem("theme", targetTheme);
 };
+
+let legendToggle = document.getElementById("legend-toggle");
+let legendOn = false;
+legendToggle.onclick = function(e) {
+    this.querySelectorAll("svg").forEach(el => el.classList.toggle("hidden"));
+    if (legendOn) {
+        showTab("calendar")
+    } else {
+        showTab("legend");
+    }
+    legendOn = !legendOn;
+}
+
+function showTab(tabName) {
+    document.querySelectorAll(".tab").forEach(el => el.classList.add("hidden"));
+    document.getElementById(tabName).classList.remove("hidden");
+}
 
 // Date
 Date.prototype.copy = function() {
@@ -422,8 +479,6 @@ function addDiv(container, className) {
     return newDiv;
 }
 
-const app = document.getElementById('app');
-
 function period(payroll) {
     const d = document.createElement("div");
     d.className = "date-range";
@@ -530,15 +585,56 @@ function drawPayPeriod(root, payroll) {
     }
 }
 
-function drawCurrentPayPeriod(app) {
+function drawCurrentPayPeriod(rootNode) {
     let payroll = new Payroll(new Date());
     while (payroll.start.getFullYear() == 2021) {
-        drawPayPeriod(app, payroll);
+        drawPayPeriod(rootNode, payroll);
         payroll = payroll.nextPayroll();
     }
 }
 
-drawCurrentPayPeriod(app);
+function drawLegend(rootNode) {
+    const payroll = new Payroll(new Date(2021, 0, 1));
+    const daysContainer = addDiv(rootNode, "daysContainer");
+
+    let i = payroll.start;
+    i.advance(10);  // the days only look nice (read: square) if at least one has two digits :)
+    const workday = day(i, payroll);
+    workday.className = "day";
+    daysContainer.appendChild(workday);
+    let desc = addDiv(daysContainer, "description");
+    desc.innerHTML = "Workday";
+
+    i.advance();
+    const holiday = day(i, payroll);
+    holiday.className = "day holiday";
+    daysContainer.appendChild(holiday);
+    desc = addDiv(daysContainer, "description");
+    desc.innerHTML = "Holiday";
+
+    i.advance();
+    const offFriday = day(i, payroll);
+    offFriday.className = "day off-friday";
+    daysContainer.appendChild(offFriday);
+    desc = addDiv(daysContainer, "description");
+    desc.innerHTML = "Off-friday";
+
+    i.advance();
+    const weekend = day(i, payroll);
+    weekend.className = "day weekend";
+    daysContainer.appendChild(weekend);
+    desc = addDiv(daysContainer, "description");
+    desc.innerHTML = "Weekend";
+}
+
+const app = document.getElementById('app');
+const calendar = addDiv(app, "tab");
+calendar.id = "calendar";
+drawCurrentPayPeriod(calendar);
+
+const legend = addDiv(app, "tab hidden");
+legend.id = "legend";
+drawLegend(legend);
     </script>
   </body>
 </html>
