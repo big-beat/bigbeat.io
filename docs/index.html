@@ -208,6 +208,19 @@
         .high-hours {
             color: red;
         }
+
+        .rotate {
+            animation: rotate 2s ease-in-out infinite alternate both;
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: rotate(0);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 
     <script>
@@ -627,7 +640,40 @@ function drawLegend(rootNode) {
     desc.innerHTML = "Weekend";
 }
 
-const app = document.getElementById('app');
+// :D
+let allowedKeys = {
+  37: 'left',
+  38: 'up',
+  39: 'right',
+  40: 'down',
+  65: 'a',
+  66: 'b'
+};
+let konamiCode = ['up', 'up', 'down', 'down', 'left', 'right', 'left', 'right', 'b', 'a'];
+let konamiCodePosition = 0;
+document.addEventListener('keydown', function(e) {
+  let key = allowedKeys[e.keyCode];
+  let requiredKey = konamiCode[konamiCodePosition];
+  if (key == requiredKey) {
+    konamiCodePosition++;
+    if (konamiCodePosition == konamiCode.length) {
+      disco();
+      konamiCodePosition = 0;
+    }
+  } else {
+    konamiCodePosition = 0;
+  }
+});
+
+function disco() {
+    document.querySelectorAll(".day").forEach(el => {
+        el.style.backgroundImage = "url('beasley.jpg')";
+        el.style.backgroundSize = "cover";
+        el.classList.add("rotate");
+    });
+}
+
+const app = document.getElementById("app");
 const calendar = addDiv(app, "tab");
 calendar.id = "calendar";
 drawCurrentPayPeriod(calendar);
