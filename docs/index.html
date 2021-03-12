@@ -15,6 +15,8 @@
             --today-border-color: orangered;
             --today-border-thickness: 3px;
             --day-padding: 1em;
+            --day-border-radius: 5px;
+            --grid-gap: 10px;
         }
 
         :root[data-theme='light'] {
@@ -48,16 +50,6 @@
             display: none;
         }
 
-        /* settings unique to smaller screens */
-        @media (max-width: 600px) {
-            :root {
-                --day-padding: .4em;
-            }
-            .github-ribbon {
-                display: none;
-            }
-        }
-
         .hidden {
             display: none;
         }
@@ -73,7 +65,7 @@
         header {
             display: flex;
             margin: .2em;
-            margin-bottom: .8em;
+            margin-bottom: .1em;
         }
 
         header .left, header .right {
@@ -82,6 +74,7 @@
         }
 
         header .center {
+            text-decoration: underline;
             margin-top: auto;
             margin-bottom: auto;
         }
@@ -117,9 +110,6 @@
             justify-content: center;
         }
 
-        #app {
-        }
-
         .pay-period {
             padding-bottom: 2em;
         }
@@ -128,24 +118,36 @@
             margin-bottom: .4em;
         }
 
-        .daysContainer {
+        .days-container {
             cursor: default;
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            grid-gap: 10px;
+            grid-gap: var(--grid-gap);
             background-color: var(--background-color);
             transition: color .2s ease-in, background-color .2s ease-in;
         }
 
         #legend {
-            max-width: 600px;
-        }
-
-        #legend .daysContainer {
-            grid-template-columns: auto 1fr;
+            display: flex;
+            justify-content: center;
             align-items: center;
+            margin-bottom: 1em;
         }
 
+        #legend .day {
+            width: 0;
+            border-radius: var(--day-border-radius);
+            padding: .5em;
+        }
+
+        #legend .day:not(:first-child) {
+            margin-left: 2ch;
+        }
+
+        #legend .description {
+            margin-left: .5ch;
+        }
+1em
         .month {
             font-size: 150%;
         }
@@ -157,7 +159,7 @@
         .day {
             color: var(--days-color);
             background-color: var(--days-background-color);
-            border-radius: 5px;
+            border-radius: var(--day-border-radius);
             text-align: center;
             font-size: 150%;
             padding: var(--day-padding);
@@ -221,6 +223,20 @@
                 transform: rotate(360deg);
             }
         }
+
+        /* settings unique to smaller screens */
+        @media (max-width: 600px) {
+            :root {
+                --day-padding: .4em;
+            }
+            .github-ribbon {
+                display: none;
+            }
+            #legend {
+                font-size: 80%;
+            }
+        }
+
     </style>
 
     <script>
@@ -267,16 +283,6 @@
 
     <header>
         <span class="left">
-            <span class="button" id="legend-toggle">
-                <svg class="icon">
-                    <title>Legend</title>
-                    <use href="#help"></use>
-                </svg>
-                <svg class="icon hidden">
-                    <title>Calendar</title>
-                    <use href="#cal"></use>
-                </svg>
-            </span>
             <span aria-hidden="true" class="button" id="theme-toggle">
                 <svg class="icon light-hidden">
                     <title>Light Mode</title>
@@ -307,18 +313,6 @@ darkToggle.onclick = function() {
     document.documentElement.setAttribute("data-theme", targetTheme)
     localStorage.setItem("theme", targetTheme);
 };
-
-let legendToggle = document.getElementById("legend-toggle");
-let legendOn = false;
-legendToggle.onclick = function(e) {
-    this.querySelectorAll("svg").forEach(el => el.classList.toggle("hidden"));
-    if (legendOn) {
-        showTab("calendar")
-    } else {
-        showTab("legend");
-    }
-    legendOn = !legendOn;
-}
 
 function showTab(tabName) {
     document.querySelectorAll(".tab").forEach(el => el.classList.add("hidden"));
@@ -587,7 +581,7 @@ function drawPayPeriod(root, payroll) {
     drawSummary(payPeriod, payroll);
 
     const daysContainer = document.createElement("div");
-    daysContainer.className = "daysContainer";
+    daysContainer.className = "days-container";
     payPeriod.appendChild(daysContainer);
 
     let i = weekStart.copy();
@@ -598,7 +592,7 @@ function drawPayPeriod(root, payroll) {
     }
 }
 
-function drawCurrentPayPeriod(rootNode) {
+function drawFromCurrentPayPeriod(rootNode) {
     let payroll = new Payroll(new Date());
     while (payroll.start.getFullYear() == 2021) {
         drawPayPeriod(rootNode, payroll);
@@ -607,37 +601,21 @@ function drawCurrentPayPeriod(rootNode) {
 }
 
 function drawLegend(rootNode) {
-    const payroll = new Payroll(new Date(2021, 0, 1));
-    const daysContainer = addDiv(rootNode, "daysContainer");
+    addDiv(rootNode, "day");
+    let workDesc = addDiv(rootNode, "description");
+    workDesc.innerHTML = "Workday";
 
-    let i = payroll.start;
-    i.advance(10);  // the days only look nice (read: square) if at least one has two digits :)
-    const workday = day(i, payroll);
-    workday.className = "day";
-    daysContainer.appendChild(workday);
-    let desc = addDiv(daysContainer, "description");
-    desc.innerHTML = "Workday";
+    addDiv(rootNode, "day holiday");
+    let holidayDesc = addDiv(rootNode, "description");
+    holidayDesc .innerHTML = "Holiday";
 
-    i.advance();
-    const holiday = day(i, payroll);
-    holiday.className = "day holiday";
-    daysContainer.appendChild(holiday);
-    desc = addDiv(daysContainer, "description");
-    desc.innerHTML = "Holiday";
+    addDiv(rootNode, "day off-friday");
+    let offFridayDesc = addDiv(rootNode, "description");
+    offFridayDesc .innerHTML = "Off-friday";
 
-    i.advance();
-    const offFriday = day(i, payroll);
-    offFriday.className = "day off-friday";
-    daysContainer.appendChild(offFriday);
-    desc = addDiv(daysContainer, "description");
-    desc.innerHTML = "Off-friday";
-
-    i.advance();
-    const weekend = day(i, payroll);
-    weekend.className = "day weekend";
-    daysContainer.appendChild(weekend);
-    desc = addDiv(daysContainer, "description");
-    desc.innerHTML = "Weekend";
+    addDiv(rootNode, "day weekend");
+    let weekendDesc = addDiv(rootNode, "description");
+    weekendDesc.innerHTML = "Weekend";
 }
 
 // :D
@@ -674,13 +652,14 @@ function disco() {
 }
 
 const app = document.getElementById("app");
-const calendar = addDiv(app, "tab");
-calendar.id = "calendar";
-drawCurrentPayPeriod(calendar);
 
-const legend = addDiv(app, "tab hidden");
+const legend = addDiv(app, "");
 legend.id = "legend";
 drawLegend(legend);
+
+const calendar = addDiv(app, "tab");
+calendar.id = "calendar";
+drawFromCurrentPayPeriod(calendar);
     </script>
   </body>
 </html>
