@@ -1,6 +1,6 @@
 # Schedule
 
-Visualize semi-monthly payperiods while trying to achieve a 9/80 schedule.
+Visualize semi-monthly pay periods while trying to achieve a 9/80 schedule.
 
 ## Ancillary goals
 
