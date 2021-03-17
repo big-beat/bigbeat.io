@@ -401,6 +401,14 @@ Payroll.prototype.nextPayroll = function() {
     return new Payroll(this.end.nextDay());
 }
 
+Payroll.prototype.iterNextPayrolls = function* () {
+    payroll = this.nextPayroll();
+    while (true) {
+        yield payroll;
+        payroll = payroll.nextPayroll();
+    }
+}
+
 Payroll.prototype.stats = function() {
     const stats = {
         holidayHours: 0,
@@ -572,7 +580,7 @@ function drawSummary(root, payroll) {
     root.appendChild(summary);
 };
 
-function drawPayPeriod(root, payroll) {
+function drawPayPeriod(root, payroll, options={}) {
     const today = new Date();
     const weekStart = payroll.start.prevMonday();
     const weekEnd = payroll.end.nextSunday();
@@ -581,7 +589,7 @@ function drawPayPeriod(root, payroll) {
     payPeriod.className = "pay-period";
     root.appendChild(payPeriod);
 
-    if (payroll.start.getDate() === 1) {
+    if (options.forceDrawMonth || payroll.start.getDate() === 1) {
         const month = addDiv(payPeriod, "month");
         const monthName = payroll.start.toLocaleString("default", {month: "long"});
         month.innerHTML = `${monthName}`;
@@ -603,9 +611,13 @@ function drawPayPeriod(root, payroll) {
 
 function drawFromCurrentPayPeriod(rootNode) {
     let payroll = new Payroll(new Date());
-    while (payroll.start.getFullYear() == 2021) {
-        drawPayPeriod(rootNode, payroll);
-        payroll = payroll.nextPayroll();
+    drawPayPeriod(rootNode, payroll, {forceDrawMonth: true});
+    for (let p of payroll.iterNextPayrolls()) {
+        // we do not have holidays defined past 2021
+        if (p.start.getFullYear() > 2021) {
+            break;
+        }
+        drawPayPeriod(rootNode, p);
     }
 }
 
