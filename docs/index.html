@@ -314,11 +314,6 @@ darkToggle.onclick = function() {
     localStorage.setItem("theme", targetTheme);
 };
 
-function showTab(tabName) {
-    document.querySelectorAll(".tab").forEach(el => el.classList.add("hidden"));
-    document.getElementById(tabName).classList.remove("hidden");
-}
-
 // Date
 Date.prototype.copy = function() {
     return new Date(this.valueOf());
@@ -376,8 +371,24 @@ function Payroll(middleDate) {
     this.end = this._end()
 }
 
+const specialCases = [
+    {
+        "start": new Date(2021, 3, 1),
+        "end": new Date(2021, 3, 7),
+    },
+    {
+        "start": new Date(2021, 3, 8),
+        "end": new Date(2021, 3, 15),
+    },
+]
+
 Payroll.prototype._start = function() {
     const d = this.middleDate;
+    for (let specialCase of specialCases) {
+        if (specialCase.start <= d && d <= specialCase.end) {
+                return specialCase.start;
+        }
+    }
     const year = d.getFullYear();
     const month = d.getMonth();
     const day = d.getDate();
@@ -387,6 +398,11 @@ Payroll.prototype._start = function() {
 
 Payroll.prototype._end = function() {
     const d = this.middleDate;
+    for (let specialCase of specialCases) {
+        if (specialCase.start <= d && d <= specialCase.end) {
+                return specialCase.end;
+        }
+    }
     const year = d.getFullYear();
     const month = d.getMonth();
     const day = d.getDate();
@@ -499,6 +515,11 @@ function addDiv(container, className) {
     return newDiv;
 }
 
+function showTab(tabName) {
+    document.querySelectorAll(".tab").forEach(el => el.classList.add("hidden"));
+    document.getElementById(tabName).classList.remove("hidden");
+}
+
 function period(payroll) {
     const d = document.createElement("div");
     d.className = "date-range";
@@ -581,7 +602,6 @@ function drawSummary(root, payroll) {
 };
 
 function drawPayPeriod(root, payroll, options={}) {
-    const today = new Date();
     const weekStart = payroll.start.prevMonday();
     const weekEnd = payroll.end.nextSunday();
 
@@ -609,8 +629,12 @@ function drawPayPeriod(root, payroll, options={}) {
     }
 }
 
+const payrollSwitchDate = new Date(2021, 3, 1);
+
 function drawFromCurrentPayPeriod(rootNode) {
-    let payroll = new Payroll(new Date());
+    const today = new Date();
+    const startDate = today >= payrollSwitchDate ? today : payrollSwitchDate;
+    let payroll = new Payroll(startDate);
     drawPayPeriod(rootNode, payroll, {forceDrawMonth: true});
     for (let p of payroll.iterNextPayrolls()) {
         // we do not have holidays defined past 2021
