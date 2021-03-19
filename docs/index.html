@@ -369,16 +369,24 @@ function Payroll(middleDate) {
     this.middleDate = middleDate,
     this.start = this._start(),
     this.end = this._end()
+    this.payday = this._payday()
 }
 
 const specialCases = [
     {
+        "start": new Date(2021, 2, 20),
+        "end": new Date(2021, 2, 31),
+        "payday": new Date(2021, 2, 31),
+    },
+    {
         "start": new Date(2021, 3, 1),
         "end": new Date(2021, 3, 7),
+        "payday": new Date(2021, 3, 12),
     },
     {
         "start": new Date(2021, 3, 8),
         "end": new Date(2021, 3, 15),
+        "payday": new Date(2021, 3, 22),
     },
 ]
 
@@ -411,6 +419,27 @@ Payroll.prototype._end = function() {
             new Date(year, month, 15) :
             new Date(year, month+1, 0);
     return end;
+}
+
+Payroll.prototype._payday = function() {
+    const d = this.middleDate;
+    for (let specialCase of specialCases) {
+        if (specialCase.start <= d && d <= specialCase.end) {
+                return specialCase.payday;
+        }
+    }
+
+    const startYear = this.start.getFullYear();
+    const startMonth = this.start.getMonth();
+    const startDay = this.start.getDate();
+
+    if (startDay === 1) {
+        return new Date(startYear, startMonth, 22);
+    } else if (startDay == 16) {
+        return new Date(startYear, startMonth+1, 7);
+    } else {
+        throw `startDay (${startDay}) is not 1 or 16`;
+    }
 }
 
 Payroll.prototype.nextPayroll = function() {
@@ -523,7 +552,7 @@ function showTab(tabName) {
 function period(payroll) {
     const d = document.createElement("div");
     d.className = "date-range";
-    d.innerHTML = `<span class="stat-name">Payroll:</span> ${payroll.start.toLocaleDateString("en-US")} &ndash; ${payroll.end.toLocaleDateString("en-US")}`;
+        d.innerHTML = `<span class="stat-name">Payroll:</span> <span title="Payday: ${payroll.payday.toLocaleDateString('en-US')}">${payroll.start.toLocaleDateString("en-US")} &ndash; ${payroll.end.toLocaleDateString("en-US")}</span>`;
     return d;
 }
 
@@ -629,7 +658,7 @@ function drawPayPeriod(root, payroll, options={}) {
     }
 }
 
-const payrollSwitchDate = new Date(2021, 3, 1);
+const payrollSwitchDate = new Date(2021, 2, 20);
 
 function drawFromCurrentPayPeriod(rootNode) {
     const today = new Date();
