@@ -635,7 +635,7 @@ function stats(payroll) {
     }
 
     let hoursDiffSpan = ""
-    const hoursDiff = stats.nineEightyHours - stats.workHours
+    const hoursDiff = stats.nineEightyHours - (stats.workHours + stats.holidayHours)
     if (hoursDiff !== 0) {
         hoursDiffSpan = "(Difference: <span class=\"" + ((hoursDiff > 0) ? "over-hours" : "under-hours") + "\">" + hoursDiff + "</span> Hours)"
     }
