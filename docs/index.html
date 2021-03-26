@@ -209,6 +209,16 @@
             font-weight: bold;
         }
 
+        .under-hours {
+            color: red;
+            font-weight: bold;
+        }
+
+        .over-hours {
+            color: green;
+            font-weight: bold;
+        }
+
         .rotate {
             animation: rotate 2s ease-in-out infinite alternate both;
         }
@@ -459,15 +469,24 @@ Payroll.prototype.stats = function() {
         holidayHours: 0,
         workHours: 0,
         workDays: 0,
+        nineEightyHours: 0
     };
     let i = this.start.copy();
     while (i <= this.end) {
         if (i.getDay() > 0 && i.getDay() < 6) {
             if (isHoliday(i)) {
                 stats.holidayHours += 8;
+                stats.nineEightyHours += 8;
             } else {
                 stats.workHours += 8;
                 if (!isObservedOffFriday(i)) {
+                    if (isFriday(i)) {
+                        stats.nineEightyHours += 8;
+                    }
+                    else {
+                        stats.nineEightyHours += 9;
+                    }
+
                     stats.workDays += 1;
                 }
             }
@@ -519,6 +538,11 @@ function dayBeforeHolidayStreak(d) {
         i.advance();
     }
     return true;
+}
+
+function isFriday(d) {
+    const aFriday = new Date(2021, 1, 19);
+    return d.daysUntil(aFriday) % 7 === 0;
 }
 
 function isOffFriday(d) {
@@ -609,12 +633,23 @@ function stats(payroll) {
     if (stats.holidayHours > 0) {
         holidayHoursText = ` + ${stats.holidayHours} holiday = ${stats.workHours + stats.holidayHours}`;
     }
+
+    let hoursDiffSpan = ""
+    const hoursDiff = stats.nineEightyHours - stats.workHours
+    if (hoursDiff !== 0) {
+        hoursDiffSpan = "(Difference: <span class=\"" + ((hoursDiff > 0) ? "over-hours" : "under-hours") + "\">" + hoursDiff + "</span> Hours)"
+    }
     const hoursDiv = document.createElement("div");
     hoursDiv.className = "hours";
     hoursDiv.innerHTML = `
         <span class="stat-name">Hours:</span>
         <span class="stat-value">
             ${stats.workHours} (<span class="${highHours}">${avgHours.toFixed(2)}</span>/day) ${holidayHoursText}
+        </span>
+        <br />
+        <span class="stat-name">9/80 Hours:</span>
+        <span class="stat-value">
+            ${stats.nineEightyHours} ${hoursDiffSpan}
         </span>`;
     hoursDiv.setAttribute("title", "Non-holiday hours + holiday hours (if any)");
     statsDiv.appendChild(hoursDiv);
