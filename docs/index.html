@@ -541,7 +541,7 @@ function dayBeforeHolidayStreak(d) {
 }
 
 function isFriday(d) {
-    return d.getDay() === 6;
+    return d.getDay() === 5;
 }
 
 function isOffFriday(d) {
@@ -572,10 +572,14 @@ function showTab(tabName) {
     document.getElementById(tabName).classList.remove("hidden");
 }
 
+function plural(word, count) {
+    return count === 1 ? word : `${word}s`;
+}
+
 function period(payroll) {
     const d = document.createElement("div");
     d.className = "date-range";
-        d.innerHTML = `<span class="stat-name">Payroll:</span> <span title="Payday: ${payroll.payday.toLocaleDateString('en-US')}">${payroll.start.toLocaleDateString("en-US")} &ndash; ${payroll.end.toLocaleDateString("en-US")}</span>`;
+    d.innerHTML = `<span class="stat-name">Payroll:</span> <span title="Payday: ${payroll.payday.toLocaleDateString('en-US')}">${payroll.start.toLocaleDateString("en-US")} &ndash; ${payroll.end.toLocaleDateString("en-US")}</span>`;
     return d;
 }
 
@@ -633,25 +637,36 @@ function stats(payroll) {
         holidayHoursText = ` + ${stats.holidayHours} holiday = ${stats.workHours + stats.holidayHours}`;
     }
 
-    let hoursDiffSpan = ""
-    const hoursDiff = stats.nineEightyHours - (stats.workHours + stats.holidayHours)
-    if (hoursDiff !== 0) {
-        hoursDiffSpan = "(Difference: <span class=\"" + ((hoursDiff > 0) ? "over-hours" : "under-hours") + "\">" + hoursDiff + "</span> Hours)"
-    }
     const hoursDiv = document.createElement("div");
     hoursDiv.className = "hours";
     hoursDiv.innerHTML = `
         <span class="stat-name">Hours:</span>
         <span class="stat-value">
-            ${stats.workHours} (<span class="${highHours}">${avgHours.toFixed(2)}</span>/day) ${holidayHoursText}
-        </span>
-        <br />
-        <span class="stat-name">9/80 Hours:</span>
+            ${stats.workHours} ${holidayHoursText}
+        </span>`;
+    hoursDiv.setAttribute("title", "Non-holiday hours + holiday hours (if any)");
+
+    let hoursDiffSpan = ""
+    const hoursDiff = stats.nineEightyHours - (stats.workHours + stats.holidayHours)
+    if (hoursDiff !== 0) {
+        const hoursDiffClass = hoursDiff < 0 ? "under-hours" : "over-hours";
+        hoursDiffSpan = `
+            (<span class='${hoursDiffClass}'>${Math.abs(hoursDiff)} </span> ${plural('hour', hoursDiff)} ` +
+            (hoursDiff < 0 ? "short" : "over") +
+            ")";
+    }
+
+    const hours980Div = document.createElement("div");
+    hours980Div.className = "hours";
+    hours980Div.innerHTML = `
+        <span class="stat-name">9/80 hours:</span>
         <span class="stat-value">
             ${stats.nineEightyHours} ${hoursDiffSpan}
         </span>`;
-    hoursDiv.setAttribute("title", "Non-holiday hours + holiday hours (if any)");
+    hours980Div.setAttribute("title", "9/80 hours including holiday hours");
+
     statsDiv.appendChild(hoursDiv);
+    statsDiv.appendChild(hours980Div);
 
     return statsDiv;
 }
