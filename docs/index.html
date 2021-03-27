@@ -651,7 +651,7 @@ function stats(payroll) {
     if (hoursDiff !== 0) {
         const hoursDiffClass = hoursDiff < 0 ? "under-hours" : "over-hours";
         hoursDiffSpan = `
-            (<span class='${hoursDiffClass}'>${Math.abs(hoursDiff)} </span> ${plural('hour', hoursDiff)} ` +
+            (<span class='${hoursDiffClass}'>${Math.abs(hoursDiff)} </span> ${plural('hour', Math.abs(hoursDiff))} ` +
             (hoursDiff < 0 ? "short" : "over") +
             ")";
     }
