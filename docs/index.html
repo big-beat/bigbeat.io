@@ -209,6 +209,16 @@
             font-weight: bold;
         }
 
+        .under-hours {
+            color: red;
+            font-weight: bold;
+        }
+
+        .over-hours {
+            color: green;
+            font-weight: bold;
+        }
+
         .rotate {
             animation: rotate 2s ease-in-out infinite alternate both;
         }
@@ -459,15 +469,24 @@ Payroll.prototype.stats = function() {
         holidayHours: 0,
         workHours: 0,
         workDays: 0,
+        nineEightyHours: 0
     };
     let i = this.start.copy();
     while (i <= this.end) {
         if (i.getDay() > 0 && i.getDay() < 6) {
             if (isHoliday(i)) {
                 stats.holidayHours += 8;
+                stats.nineEightyHours += 8;
             } else {
                 stats.workHours += 8;
                 if (!isObservedOffFriday(i)) {
+                    if (isFriday(i)) {
+                        stats.nineEightyHours += 8;
+                    }
+                    else {
+                        stats.nineEightyHours += 9;
+                    }
+
                     stats.workDays += 1;
                 }
             }
@@ -521,6 +540,10 @@ function dayBeforeHolidayStreak(d) {
     return true;
 }
 
+function isFriday(d) {
+    return d.getDay() === 5;
+}
+
 function isOffFriday(d) {
     const anOffFriday = new Date(2021, 1, 19);
     return d.daysUntil(anOffFriday) % 14 === 0;
@@ -549,10 +572,14 @@ function showTab(tabName) {
     document.getElementById(tabName).classList.remove("hidden");
 }
 
+function plural(word, count) {
+    return count === 1 ? word : `${word}s`;
+}
+
 function period(payroll) {
     const d = document.createElement("div");
     d.className = "date-range";
-        d.innerHTML = `<span class="stat-name">Payroll:</span> <span title="Payday: ${payroll.payday.toLocaleDateString('en-US')}">${payroll.start.toLocaleDateString("en-US")} &ndash; ${payroll.end.toLocaleDateString("en-US")}</span>`;
+    d.innerHTML = `<span class="stat-name">Payroll:</span> <span title="Payday: ${payroll.payday.toLocaleDateString('en-US')}">${payroll.start.toLocaleDateString("en-US")} &ndash; ${payroll.end.toLocaleDateString("en-US")}</span>`;
     return d;
 }
 
@@ -609,15 +636,37 @@ function stats(payroll) {
     if (stats.holidayHours > 0) {
         holidayHoursText = ` + ${stats.holidayHours} holiday = ${stats.workHours + stats.holidayHours}`;
     }
+
     const hoursDiv = document.createElement("div");
     hoursDiv.className = "hours";
     hoursDiv.innerHTML = `
         <span class="stat-name">Hours:</span>
         <span class="stat-value">
-            ${stats.workHours} (<span class="${highHours}">${avgHours.toFixed(2)}</span>/day) ${holidayHoursText}
+            ${stats.workHours} ${holidayHoursText}
         </span>`;
     hoursDiv.setAttribute("title", "Non-holiday hours + holiday hours (if any)");
+
+    let hoursDiffSpan = ""
+    const hoursDiff = stats.nineEightyHours - (stats.workHours + stats.holidayHours)
+    if (hoursDiff !== 0) {
+        const hoursDiffClass = hoursDiff < 0 ? "under-hours" : "over-hours";
+        hoursDiffSpan = `
+            (<span class='${hoursDiffClass}'>${Math.abs(hoursDiff)} </span> ${plural('hour', hoursDiff)} ` +
+            (hoursDiff < 0 ? "short" : "over") +
+            ")";
+    }
+
+    const hours980Div = document.createElement("div");
+    hours980Div.className = "hours";
+    hours980Div.innerHTML = `
+        <span class="stat-name">9/80 hours:</span>
+        <span class="stat-value">
+            ${stats.nineEightyHours} ${hoursDiffSpan}
+        </span>`;
+    hours980Div.setAttribute("title", "9/80 hours including holiday hours");
+
     statsDiv.appendChild(hoursDiv);
+    statsDiv.appendChild(hours980Div);
 
     return statsDiv;
 }
