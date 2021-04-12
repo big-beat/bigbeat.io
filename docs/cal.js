@@ -62,16 +62,6 @@ const specialCases = [
         "end": new Date(2021, 2, 31),
         "payday": new Date(2021, 2, 31),
     },
-    {
-        "start": new Date(2021, 3, 1),
-        "end": new Date(2021, 3, 7),
-        "payday": new Date(2021, 3, 12),
-    },
-    {
-        "start": new Date(2021, 3, 8),
-        "end": new Date(2021, 3, 15),
-        "payday": new Date(2021, 3, 22),
-    },
 ]
 
 Payroll.prototype._start = function() {
