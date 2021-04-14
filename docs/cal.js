@@ -170,7 +170,7 @@ const holidays = new Set([
     new Date(2021, 9, 11),  // Indigenous People Day
     new Date(2021, 10, 11), // Veteran's Day
     new Date(2021, 10, 25), // Thanksgiving Day
-    new Date(2021, 11, 27), // Christmas Day
+    new Date(2021, 11, 24), // Christmas Day
 ].map(d => d.toDateString()));
 
 function isHoliday(d) {
