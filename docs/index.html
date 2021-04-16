@@ -83,7 +83,7 @@
             display: inline-block;
         }
 
-        header .icon {
+        .icon {
             height: 1.5em;
             width: 1.5em;
             cursor: pointer;
@@ -91,13 +91,17 @@
             filter: opacity(80%);
         }
 
-        header .left .button:not(:first-child) {
-            margin-left: 6px;
+        .icon, .icon:active, .icon:visited, .icon:hover, .icon:focus {
+            color: var(--color);
         }
 
-        header .icon:hover {
+        .icon:hover {
             filter: opacity(100%);
             filter: brightness(100%);
+        }
+
+        header .left .button:not(:first-child) {
+            margin-left: 6px;
         }
 
         #moon {
@@ -146,6 +150,10 @@
 
         #legend .description {
             margin-left: .5ch;
+        }
+
+        .cal-action {
+            float: right;
         }
 1em
         .pay-period:not(:first-child) .month {
@@ -284,6 +292,12 @@
             <line x1="16" y1="2" x2="16" y2="6"></line>
             <line x1="8" y1="2" x2="8" y2="6"></line>
             <line x1="3" y1="10" x2="21" y2="10"></line>
+        </symbol>
+        <symbol viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="chevron-left">
+            <polyline points="15 18 9 12 15 6"></polyline>
+        </symbol>
+        <symbol viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="chevron-down">
+            <polyline points="6 9 12 15 18 9"></polyline>
         </symbol>
     </svg>
 
@@ -474,11 +488,43 @@ function drawPayPeriod(root, payroll, options={}) {
     }
 }
 
+function urlHash() {
+    const hash = window.location.hash.substr(1);  // remove starting '#' character
+
+    return hash.split('&').reduce(function (res, item) {
+        var parts = item.split('=');
+        res[parts[0]] = parts[1];
+        return res;
+    }, {});
+}
+
 const payrollSwitchDate = new Date(2021, 2, 20);
 
-function drawFromCurrentPayPeriod(rootNode) {
+function drawCalendar(rootNode) {
+    const hash = urlHash();
+    const calAction = document.createElement("div");
+    calAction.className = "cal-action";
+    rootNode.appendChild(calAction);
+    if (hash.startDate) {
+        calAction.innerHTML = `<a href="#">
+            <svg class="icon">
+                <title>Hide history</title>
+                <use href="#chevron-down"></use>
+            </svg>
+        </a>`;
+    } else {
+        calAction.innerHTML = `<a href="#startDate=${payrollSwitchDate.toJSON()}">
+            <svg class="icon">
+                <title>Show history</title>
+                <use href="#chevron-left"></use>
+            </svg>
+        </a>`;
+    }
+
     const today = new Date();
-    const startDate = today >= payrollSwitchDate ? today : payrollSwitchDate;
+    let startDate = hash.startDate || today;
+    startDate = startDate >= payrollSwitchDate ? startDate : payrollSwitchDate;
+
     let payroll = new Payroll(startDate);
     drawPayPeriod(rootNode, payroll, {forceDrawMonth: true});
     for (let p of payroll.iterNextPayrolls()) {
@@ -549,7 +595,13 @@ drawLegend(legend);
 
 const calendar = addDiv(app, "tab");
 calendar.id = "calendar";
-drawFromCurrentPayPeriod(calendar);
+
+window.addEventListener("hashchange", function () {
+    calendar.innerHTML = "";
+    drawCalendar(calendar);
+});
+
+drawCalendar(calendar);
     </script>
   </body>
 </html>
