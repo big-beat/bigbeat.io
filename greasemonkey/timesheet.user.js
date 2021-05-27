@@ -3,7 +3,7 @@
 // @namespace   https://github.com/big-beat/
 // @match       https://pci-sm.unanet.biz/pci-sm/action/time/edit
 // @grant       none
-// @version     1.0
+// @version     1.1
 // @author      jrib
 // @description Display hours remaining in the pay period.
 // ==/UserScript==
