@@ -10,7 +10,7 @@
 
 (function() {
   // TODO: figure out how to just leverage https://bigbeat.io/cal.js instead of copying code
-
+  // 
   // Date
 Date.prototype.copy = function() {
     return new Date(this.valueOf());
@@ -246,7 +246,8 @@ function isBeforeToday(d) {
 
 
   var hoursEntered = getTimeGridTotal();
-  var hoursNeeded = new Payroll(new Date()).stats().workHours;
+  var currentPayPeriod = new Payroll(new Date()).stats();
+  var hoursNeeded = currentPayPeriod.workHours + currentPayPeriod.holidayHours;
   var hoursRemaining = hoursNeeded - hoursEntered ;
   var s = document.createElement("span");
   s.innerHTML = "hrs remaining: " + hoursRemaining;
