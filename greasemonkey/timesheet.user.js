@@ -3,15 +3,14 @@
 // @namespace   https://github.com/big-beat/
 // @match       https://pci-sm.unanet.biz/pci-sm/action/time/edit
 // @grant       none
-// @version     1.2
+// @version     1.3
 // @author      jrib
 // @description Display hours remaining in the pay period.
 // ==/UserScript==
 
 (function() {
-  // TODO: figure out how to just leverage https://bigbeat.io/cal.js instead of copying code
-  // 
-  // Date
+// TODO: figure out how to just leverage https://bigbeat.io/cal.js instead of copying code
+// Date
 Date.prototype.copy = function() {
     return new Date(this.valueOf());
 }
@@ -244,12 +243,46 @@ function isBeforeToday(d) {
     return d < today && !d.equals(today);  // lol
 }
 
+window.addEventListener ("load", Greasemonkey_main, false);
 
-  var hoursEntered = getTimeGridTotal();
-  var currentPayPeriod = new Payroll(new Date()).stats();
-  var hoursNeeded = currentPayPeriod.workHours + currentPayPeriod.holidayHours;
-  var hoursRemaining = hoursNeeded - hoursEntered ;
-  var s = document.createElement("span");
-  s.innerHTML = "hrs remaining: " + hoursRemaining;
-  document.querySelector("#page-title-cont #page-title").appendChild(s);
+function Greasemonkey_main () {
+    // our global to avoid conflicts
+    var bigBeat = window.bigBeat = {};
+
+    // update hours remaining being displayed
+    bigBeat.updateHoursRemaining = function() {
+        var payPeriod = new Payroll(dates[0]).stats();
+
+        var hoursNeeded = payPeriod.workHours + payPeriod.holidayHours;
+        var hoursEntered = tconfig.getGridTotalF();
+        var hoursRemaining = hoursNeeded - hoursEntered ;
+
+        var hoursEl = document.querySelector("#bigbeat-hours-remaining");
+        // TODO: link to bigbeat but fix styling
+        //hoursEl.innerHTML = "[hours remaining: <a target='_blank' href='https://bigbeat.io'>" + hoursRemaining + "</a>]";
+        hoursEl.innerHTML = "[hours remaining: " + hoursRemaining + "]";
+    }
+
+    /*
+     * We rely on two globals currently:
+     *     - tconfig: to access the function to compute entered total
+     *     - dates: to know what pay-period we are in
+     */
+    if (!tconfig) {
+        throw 'tconfig is an expected global but it is not defined! Open an issue at https://github.com/big-beat/bigbeat.io/issues/new/choose .';
+    } else if (!dates[0]) {
+        throw 'dates[0] is an expected global but it is not defined! Open an issue at https://github.com/big-beat/bigbeat.io/issues/new/choose .';
+    } else {
+        // create the element to display the hours remaining
+        var hoursEl = document.createElement("span");
+        hoursEl.id = 'bigbeat-hours-remaining';
+        document.querySelector("#page-title-cont #page-title").appendChild(hoursEl);
+        bigBeat.updateHoursRemaining();
+
+        // update hours remaining on input blur
+        document.querySelectorAll("input.hours").forEach(function(e) {
+            e.setAttribute('onblur',  e.getAttribute('onblur') + '; bigBeat.updateHoursRemaining();');
+        });
+    }
+}
 })();
