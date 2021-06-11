@@ -3,13 +3,22 @@
 // @namespace   https://github.com/big-beat/
 // @match       https://pci-sm.unanet.biz/pci-sm/action/time/edit
 // @grant       none
-// @version     1.3
+// @version     1.4
 // @author      jrib
 // @description Display hours remaining in the pay period.
 // ==/UserScript==
+//
+// Changelog
+// * 1.0: Initial release.
+// * 1.1: Use workHours + holidayHours when calculating remaining hours.
+// * 1.2: No change.  Testing greasemonkey update behavior.
+// * 1.3: Recalculate hours on input blur.
+// * 1.4: Update 2021 Christmas holiday to 2021-12-24.
 
 (function() {
-// TODO: figure out how to just leverage https://bigbeat.io/cal.js instead of copying code
+// start copied calendar code
+// start shared calendar code
+// this code is copied from index.html to the greasemonkey extension by `scripts/sync-calendar-code`
 // Date
 Date.prototype.copy = function() {
     return new Date(this.valueOf());
@@ -192,7 +201,7 @@ const holidays = new Set([
     new Date(2021, 9, 11),  // Indigenous People Day
     new Date(2021, 10, 11), // Veteran's Day
     new Date(2021, 10, 25), // Thanksgiving Day
-    new Date(2021, 11, 27), // Christmas Day
+    new Date(2021, 11, 24), // Christmas Day
 ].map(d => d.toDateString()));
 
 function isHoliday(d) {
@@ -242,6 +251,8 @@ function isBeforeToday(d) {
     const today = new Date();
     return d < today && !d.equals(today);  // lol
 }
+// end shared calendar code
+// end copied calendar code
 
 window.addEventListener ("load", Greasemonkey_main, false);
 
