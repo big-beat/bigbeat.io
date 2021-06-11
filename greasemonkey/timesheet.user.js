@@ -9,7 +9,7 @@
 // ==/UserScript==
 
 (function() {
-// TODO: figure out how to just leverage https://bigbeat.io/cal.js instead of copying code
+// start copied calendar code
 // Date
 Date.prototype.copy = function() {
     return new Date(this.valueOf());
@@ -242,6 +242,7 @@ function isBeforeToday(d) {
     const today = new Date();
     return d < today && !d.equals(today);  // lol
 }
+// end copied calendar code
 
 window.addEventListener ("load", Greasemonkey_main, false);
 
