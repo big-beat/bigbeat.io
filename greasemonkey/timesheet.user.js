@@ -3,7 +3,7 @@
 // @namespace   https://github.com/big-beat/
 // @match       https://pci-sm.unanet.biz/pci-sm/action/time/edit
 // @grant       none
-// @version     1.4
+// @version     1.5
 // @author      jrib
 // @description Display hours remaining in the pay period.
 // ==/UserScript==
@@ -14,6 +14,7 @@
 // * 1.2: No change.  Testing greasemonkey update behavior.
 // * 1.3: Recalculate hours on input blur.
 // * 1.4: Update 2021 Christmas holiday to 2021-12-24.
+// * 1.5: (greasemonkey branch only): Add note that script has moved to master.
 
 (function() {
 // start copied calendar code
@@ -271,7 +272,7 @@ function Greasemonkey_main () {
         var hoursEl = document.querySelector("#bigbeat-hours-remaining");
         // TODO: link to bigbeat but fix styling
         //hoursEl.innerHTML = "[hours remaining: <a target='_blank' href='https://bigbeat.io'>" + hoursRemaining + "</a>]";
-        hoursEl.innerHTML = "[hours remaining: " + hoursRemaining + "]";
+        hoursEl.innerHTML = "[hours remaining: " + hoursRemaining + "] Please re-install this script from the <a href='https://github.com/big-beat/bigbeat.io/raw/master/greasemonkey/timesheet.user.js'>master branch</a> :)";
     }
 
     /*
