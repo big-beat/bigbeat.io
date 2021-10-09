@@ -198,7 +198,7 @@ const holidays = new Set([
     new Date(2021, 0, 18),  // Martin Luther King, Jr. Day
     new Date(2021, 1, 15),  // Washington's Birthday
     new Date(2021, 4, 31),  // Memorial Day
-    new Date(2021, 6, 5),   // Independenc Day
+    new Date(2021, 6, 5),   // Independence Day
     new Date(2021, 8, 6),   // Labor Day
     new Date(2021, 9, 11),  // Indigenous People Day
     new Date(2021, 10, 11), // Veteran's Day
