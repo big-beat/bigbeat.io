@@ -1,5 +1,5 @@
 #!/bin/bash
-"Copy shared calendar code from index.html to greasemonkey script."
+# Copy shared calendar code from index.html to greasemonkey script.
 
 pushd ${BASH_SOURCE%/*}/..
 
