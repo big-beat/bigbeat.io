@@ -3,7 +3,7 @@
 // @namespace   https://github.com/big-beat/
 // @match       https://pci-sm.unanet.biz/pci-sm/action/time/edit
 // @grant       none
-// @version     1.6
+// @version     1.7
 // @author      jrib
 // @description Display hours remaining in the pay period.
 // ==/UserScript==
@@ -16,6 +16,7 @@
 // * 1.4: Update 2021 Christmas holiday to 2021-12-24.
 // * 1.5: (greasemonkey branch only): Add note that script has moved to master.
 // * 1.6: Remove link to master branch.
+// * 1.7: Calendar library API improvements.  No functional changes.
 
 (function() {
 // start copied calendar code
