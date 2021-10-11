@@ -45,29 +45,32 @@ Date.prototype.equals = function(d) {
 }
 
 // Sunday = 0, Monday = 1, ... Saturday = 6
-Date.prototype.toNextDay = function(day) {
+// Includes the current day.
+Date.prototype.untilDay = function(day) {
     const newDay = this.copy();
     newDay.setDate(newDay.getDate() + (7 + day - newDay.getDay()) % 7);  // TIL: modulo in javascript keeps negative numbers...
     return newDay;
 }
 
-Date.prototype.toPrevDay = function(day) {
+// Includes the current day.
+Date.prototype.untilPrevDay = function(day) {
     const newDay = this.copy();
     const offset = 7 - day;
     newDay.setDate(newDay.getDate() - (newDay.getDay() + offset) % 7);
     return newDay;
 }
 
-Date.prototype.nextFriday = function() {
-    return this.toNextDay(5);
-}
-
-Date.prototype.nextSunday = function() {
-    return this.toNextDay(0);
+Date.prototype.untilSunday = function() {
+    return this.untilDay(0);
 }
 
 Date.prototype.prevMonday = function() {
-    return this.toPrevDay(1);
+    return this.untilPrevDay(1);
+}
+
+// "next" *excludes* the current day
+Date.prototype.nextFriday = function() {
+    return this.nextDay().untilDay(5);
 }
 
 
@@ -218,6 +221,7 @@ function isObservedOffFriday(d) {
 }
 
 function dayBeforeHolidayStreak(d) {
+    // This function probably does the wrong thing if we ever have a super long holiday streak ;)
     const friday = d.nextFriday();
 
     // next friday is off friday
