@@ -527,24 +527,25 @@ Payroll.prototype.stats = function() {
     return stats;
 }
 
-const holidays = new Set([
-    new Date(2021, 0, 1),   // New Year's Day
-    new Date(2021, 0, 18),  // Martin Luther King, Jr. Day
-    new Date(2021, 1, 15),  // Washington's Birthday
-    new Date(2021, 4, 31),  // Memorial Day
-    new Date(2021, 6, 5),   // Independence Day
-    new Date(2021, 8, 6),   // Labor Day
-    new Date(2021, 9, 11),  // Indigenous People Day
-    new Date(2021, 10, 11), // Veteran's Day
-    new Date(2021, 10, 25), // Thanksgiving Day
-    new Date(2021, 11, 24), // Christmas Day
-].map(d => d.toDateString()));
+const holidays = new Map([
+    [new Date(2021, 0, 1),    {"name": "New Year's Day"}],
+    [new Date(2021, 0, 18),   {"name": "Martin Luther King, Jr. Day"}],
+    [new Date(2021, 1, 15),   {"name": "Washington's Birthday"}],
+    [new Date(2021, 4, 31),   {"name": "Memorial Day"}],
+    [new Date(2021, 6, 5),    {"name": "Independence Day"}],
+    [new Date(2021, 8, 6),    {"name": "Labor Day"}],
+    [new Date(2021, 9, 11),   {"name": "Indigenous People Day"}],
+    [new Date(2021, 10, 11),  {"name": "Veteran's Day"}],
+    [new Date(2021, 10, 25),  {"name": "Thanksgiving Day"}],
+    [new Date(2021, 11, 24),  {"name": "Christmas Day"}],
+].map(([d, v]) => [d.toDateString(), v]));
 
 function isHoliday(d) {
-    if (holidays.has(d.toDateString())) {
-        return true;
-    }
-    return false;
+    return holidays.has(d.toDateString());
+}
+
+function holidayName(d) {
+    return holidays.get(d.toDateString())?.name;
 }
 
 function isObservedOffFriday(d) {
@@ -629,7 +630,7 @@ function day(d, payroll) {
 
     if (isHoliday(d)) {
         el.classList.add("holiday");
-        el.setAttribute("title", "Holiday");
+        el.setAttribute("title", `Holiday: ${holidayName(d)}`);
     }
 
     if (isToday(d)) {
