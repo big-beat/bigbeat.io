@@ -70,8 +70,12 @@
         }
 
         header .left, header .right {
-            flex-grow: 1;
             display: flex;
+            flex-grow: 1;
+        }
+
+        header .right {
+            justify-content: right;
         }
 
         header .center {
@@ -301,11 +305,10 @@
         <symbol viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="userscript">
             <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
         </symbol>
+        <symbol viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="github">
+            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+        </symbol>
     </svg>
-
-    <div class="github-ribbon" style="position: absolute; right: 0px; top: 0px; width: 150px; height: 150px; overflow: hidden; z-index: 99999;">
-        <a target="_blank" style="display: inline-block; width: 200px; overflow: hidden; padding: 6px 0px; text-align: center; transform: rotate(45deg); text-decoration: none; color: var(--github-ribbon-color); position: inherit; top: 45px; right: -40px; font: 700 13px &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; box-shadow: rgba(0, 0, 0, 0.5) 0px 2px 3px 0px; background-color: var(--github-ribbon-background-color); background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.15));" href="https://github.com/big-beat/bigbeat.io.git">Fork me on GitHub</a>
-    </div>
 
     <header>
         <span class="left">
@@ -330,6 +333,14 @@
         </span>
         <span title="Or just take every friday off and don't worry about any of this :)" class="center">9/80 schedule + semi-monthly payroll</span>
         <span class="right">
+            <span class="button">
+                <a target="_blank" href="https://github.com/big-beat/bigbeat.io.git">
+                    <svg class="icon">
+                        <title>Fork me on GitHub</title>
+                        <use href="#github"></use>
+                    </svg>
+                </a>
+            </span>
         </span>
     </header>
 
