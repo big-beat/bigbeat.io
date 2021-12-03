@@ -655,13 +655,11 @@ function stats(payroll) {
     const highHours = avgHours > 9 ? "high-hours" : "";
 
     const statsDiv = document.createElement("div");
-    statsDiv.className = "stats";
 
     const daysDiv = document.createElement("div");
     daysDiv.className = "days";
-    daysDiv.innerHTML = `<span class="stat-name">Workdays:</span> ${stats.workDays}`;
+    daysDiv.innerHTML = `<span class="stat-name">9/80 Workdays:</span> ${stats.workDays}`;
     daysDiv.setAttribute("title", "9/80 days");
-    statsDiv.appendChild(daysDiv);
 
     let holidayHoursText = "";
     if (stats.holidayHours > 0) {
@@ -696,7 +694,9 @@ function stats(payroll) {
         </span>`;
     hours980Div.setAttribute("title", "9/80 hours including holiday hours");
 
+    statsDiv.className = "stats";
     statsDiv.appendChild(hoursDiv);
+    statsDiv.appendChild(daysDiv);
     statsDiv.appendChild(hours980Div);
 
     return statsDiv;
