@@ -209,6 +209,16 @@ const holidays = new Map([
     [new Date(2021, 10, 25),  {"name": "Thanksgiving Day"}],
     [new Date(2021, 11, 24),  {"name": "Christmas Day"}],
     [new Date(2021, 11, 31),  {"name": "New Year's Day"}],
+    [new Date(2022, 0, 17),   {"name": "Martin Luther King Day"}],
+    [new Date(2022, 1, 21),   {"name": "President's Day"}],
+    [new Date(2022, 4, 30),   {"name": "Memorial Day"}],
+    [new Date(2022, 5, 20),   {"name": "Juneteenth"}],
+    [new Date(2022, 6, 4),    {"name": "Independence Day"}],
+    [new Date(2022, 8, 5),    {"name": "Labor Day"}],
+    [new Date(2022, 9, 10),   {"name": "Indigenous People Day"}],
+    [new Date(2022, 10, 11),  {"name": "Veteran's Day"}],
+    [new Date(2022, 10, 24),  {"name": "Thanksgiving"}],
+    [new Date(2022, 11, 26),  {"name": "Christmas Day"}],
 ].map(([d, v]) => [d.toDateString(), v]));
 
 function isHoliday(d) {
