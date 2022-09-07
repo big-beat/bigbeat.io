@@ -774,9 +774,14 @@ const payrollSwitchDate = new Date(2021, 2, 20);
 function drawCalendar(rootNode) {
     const hash = urlHash();
     const calAction = document.createElement("div");
+    let startDate;
     calAction.className = "cal-action";
     rootNode.appendChild(calAction);
+
     if (hash.startDate) {
+        startDate = new Date(hash.startDate);
+
+        // draw the arrow down
         calAction.innerHTML = `<a href="#">
             <svg class="icon">
                 <title>Hide history</title>
@@ -784,6 +789,10 @@ function drawCalendar(rootNode) {
             </svg>
         </a>`;
     } else {
+        const today = new Date();
+        startDate = today;
+
+        // draw the arrow collapsed
         calAction.innerHTML = `<a href="#startDate=${payrollSwitchDate.toJSON()}">
             <svg class="icon">
                 <title>Show history</title>
@@ -792,8 +801,6 @@ function drawCalendar(rootNode) {
         </a>`;
     }
 
-    const today = new Date();
-    let startDate = hash.startDate || today;
     startDate = startDate >= payrollSwitchDate ? startDate : payrollSwitchDate;
 
     let payroll = new Payroll(startDate);
