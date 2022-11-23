@@ -3,7 +3,7 @@
 // @namespace   https://github.com/big-beat/
 // @match       https://pci-sm.unanet.biz/pci-sm/action/time/edit
 // @grant       none
-// @version     1.7
+// @version     1.8
 // @author      jrib
 // @description Display hours remaining in the pay period.
 // ==/UserScript==
@@ -17,6 +17,7 @@
 // * 1.5: (greasemonkey branch only): Add note that script has moved to master.
 // * 1.6: Remove link to master branch.
 // * 1.7: Calendar library API improvements.  No functional changes.
+// * 1.8: Update 2023 holidays
 
 (function() {
 // start copied calendar code
@@ -204,7 +205,7 @@ const holidays = new Map([
     [new Date(2021, 4, 31),   {"name": "Memorial Day"}],
     [new Date(2021, 6, 5),    {"name": "Independence Day"}],
     [new Date(2021, 8, 6),    {"name": "Labor Day"}],
-    [new Date(2021, 9, 11),   {"name": "Indigenous People Day"}],
+    [new Date(2021, 9, 11),   {"name": "Indigenous Peoples' Day"}],
     [new Date(2021, 10, 11),  {"name": "Veteran's Day"}],
     [new Date(2021, 10, 25),  {"name": "Thanksgiving Day"}],
     [new Date(2021, 11, 24),  {"name": "Christmas Day"}],
@@ -215,10 +216,21 @@ const holidays = new Map([
     [new Date(2022, 5, 20),   {"name": "Juneteenth"}],
     [new Date(2022, 6, 4),    {"name": "Independence Day"}],
     [new Date(2022, 8, 5),    {"name": "Labor Day"}],
-    [new Date(2022, 9, 10),   {"name": "Indigenous People Day"}],
+    [new Date(2022, 9, 10),   {"name": "Indigenous Peoples' Day"}],
     [new Date(2022, 10, 11),  {"name": "Veteran's Day"}],
     [new Date(2022, 10, 24),  {"name": "Thanksgiving"}],
     [new Date(2022, 11, 26),  {"name": "Christmas Day"}],
+    [new Date(2023, 0, 2),    {"name": "New Year's Day"}],
+    [new Date(2023, 0, 16),   {"name": "Martin Luther King Day"}],
+    [new Date(2023, 1, 20),   {"name": "President's Day"}],
+    [new Date(2023, 4, 29),   {"name": "Memorial Day"}],
+    [new Date(2023, 5, 19),   {"name": "Juneteenth"}],
+    [new Date(2023, 6, 4),    {"name": "Independence Day"}],
+    [new Date(2023, 8, 4),    {"name": "Labor Day"}],
+    [new Date(2023, 9, 9),    {"name": "Indigenous Peoples' Day"}],
+    [new Date(2023, 10, 10),  {"name": "Veteran's Day"}],
+    [new Date(2023, 10, 23),  {"name": "Thanksgiving"}],
+    [new Date(2023, 11, 25),  {"name": "Christmas Day"}],
 ].map(([d, v]) => [d.toDateString(), v]));
 
 function isHoliday(d) {

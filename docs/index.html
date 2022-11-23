@@ -544,7 +544,7 @@ const holidays = new Map([
     [new Date(2021, 4, 31),   {"name": "Memorial Day"}],
     [new Date(2021, 6, 5),    {"name": "Independence Day"}],
     [new Date(2021, 8, 6),    {"name": "Labor Day"}],
-    [new Date(2021, 9, 11),   {"name": "Indigenous People Day"}],
+    [new Date(2021, 9, 11),   {"name": "Indigenous Peoples' Day"}],
     [new Date(2021, 10, 11),  {"name": "Veteran's Day"}],
     [new Date(2021, 10, 25),  {"name": "Thanksgiving Day"}],
     [new Date(2021, 11, 24),  {"name": "Christmas Day"}],
@@ -555,10 +555,21 @@ const holidays = new Map([
     [new Date(2022, 5, 20),   {"name": "Juneteenth"}],
     [new Date(2022, 6, 4),    {"name": "Independence Day"}],
     [new Date(2022, 8, 5),    {"name": "Labor Day"}],
-    [new Date(2022, 9, 10),   {"name": "Indigenous People Day"}],
+    [new Date(2022, 9, 10),   {"name": "Indigenous Peoples' Day"}],
     [new Date(2022, 10, 11),  {"name": "Veteran's Day"}],
     [new Date(2022, 10, 24),  {"name": "Thanksgiving"}],
     [new Date(2022, 11, 26),  {"name": "Christmas Day"}],
+    [new Date(2023, 0, 2),    {"name": "New Year's Day"}],
+    [new Date(2023, 0, 16),   {"name": "Martin Luther King Day"}],
+    [new Date(2023, 1, 20),   {"name": "President's Day"}],
+    [new Date(2023, 4, 29),   {"name": "Memorial Day"}],
+    [new Date(2023, 5, 19),   {"name": "Juneteenth"}],
+    [new Date(2023, 6, 4),    {"name": "Independence Day"}],
+    [new Date(2023, 8, 4),    {"name": "Labor Day"}],
+    [new Date(2023, 9, 9),    {"name": "Indigenous Peoples' Day"}],
+    [new Date(2023, 10, 10),  {"name": "Veteran's Day"}],
+    [new Date(2023, 10, 23),  {"name": "Thanksgiving"}],
+    [new Date(2023, 11, 25),  {"name": "Christmas Day"}],
 ].map(([d, v]) => [d.toDateString(), v]));
 
 function isHoliday(d) {
@@ -807,8 +818,8 @@ function drawCalendar(rootNode) {
     let payroll = new Payroll(startDate);
     drawPayPeriod(rootNode, payroll, {forceDrawMonth: true});
     for (let p of payroll.iterNextPayrolls()) {
-        // we do not have holidays defined past 2022
-        if (p.start.getFullYear() > 2022) {
+        // we do not have holidays defined past 2023
+        if (p.start.getFullYear() > 2023) {
             break;
         }
         drawPayPeriod(rootNode, p);
