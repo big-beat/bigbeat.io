@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# go to the scripts location in scripts/
+if [[ $BASH_SOURCE = */* ]]; then
+    cd -- "${BASH_SOURCE%/*}/" || exit 1
+fi
+
+# then up a directory
+cd .. || exit 1
+
+# then copy docs/ to vita
+scp -r docs/* vita:~/cal/

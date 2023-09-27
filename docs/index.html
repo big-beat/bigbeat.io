@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="9/80 schedule with semi-monthly payroll">
     <meta http-equiv="Permissions-Policy" content="interest-cohort=()">
-    <link rel="icon" href="favicon.svg">
-    <link rel="mask-icon" href="favicon.svg" color="#fff">
+    <link rel="icon" href="/favicon.svg">
+    <link rel="mask-icon" href="/favicon.svg" color="#fff">
     <title>BigBeat.io: 9/80 Schedule</title>
     <style>
         /* colors shared across dark and light mode */
@@ -83,6 +83,10 @@
             text-decoration: underline;
             margin-top: auto;
             margin-bottom: auto;
+        }
+
+        #page-title {
+            color:  var(--color);
         }
 
         #theme-toggle {
@@ -332,7 +336,7 @@
                 </a>
             </span>
         </span>
-        <span title="Or just take every friday off and don't worry about any of this :)" class="center">9/80 schedule + semi-monthly payroll</span>
+        <a href="/" id="page-title" class="center">9/80 schedule + semi-monthly payroll</a>
         <span class="right">
             <span class="button">
                 <a target="_blank" href="https://github.com/big-beat/bigbeat.io.git">
@@ -360,30 +364,51 @@ darkToggle.onclick = function() {
     localStorage.setItem("theme", targetTheme);
 };
 
+function determineProfile() {
+    const defaultProfile = "bigbear";  // first mover advantage!
+
+    // if the url is set, use that
+    const urlProfile = window.location.pathname.replaceAll('/', '').toLowerCase();
+    if (urlProfile) {
+        if (calendarSettings.hasOwnProperty(urlProfile)) {
+            localStorage.setItem("profile", urlProfile);
+            return urlProfile;
+        } else {
+            return defaultProfile;
+        }
+    }
+
+    // otherwise, check if a preference is stored in local storage or fall back to the default
+    const newProfile = localStorage.getItem("profile") || defaultProfile;
+    history.replaceState(null, '', `/${newProfile}/`);
+    localStorage.setItem("profile", newProfile);
+    return newProfile;
+}
+
 // start shared calendar code
 // this code is copied from index.html to the greasemonkey extension by `scripts/sync-calendar-code`
 // Date
 Date.prototype.copy = function() {
     return new Date(this.valueOf());
-}
+};
 
 Date.prototype.advance = function(days = 1) {
     this.setDate(this.getDate() + days);
     return this;
-}
+};
 
 Date.prototype.nextDay = function() {
     return this.copy().advance();
-}
+};
 
 Date.prototype.daysUntil = function(d) {
-    const oneDay = 1000 * 60 * 60 * 24
+    const oneDay = 1000 * 60 * 60 * 24;
     return Math.round(Math.abs(this - d) / oneDay);
-}
+};
 
 Date.prototype.equals = function(d) {
     return this.toDateString() === d.toDateString();
-}
+};
 
 // Sunday = 0, Monday = 1, ... Saturday = 6
 // Includes the current day.
@@ -391,7 +416,7 @@ Date.prototype.untilDay = function(day) {
     const newDay = this.copy();
     newDay.setDate(newDay.getDate() + (7 + day - newDay.getDay()) % 7);  // TIL: modulo in javascript keeps negative numbers...
     return newDay;
-}
+};
 
 // Includes the current day.
 Date.prototype.untilPrevDay = function(day) {
@@ -399,47 +424,112 @@ Date.prototype.untilPrevDay = function(day) {
     const offset = 7 - day;
     newDay.setDate(newDay.getDate() - (newDay.getDay() + offset) % 7);
     return newDay;
-}
+};
 
 Date.prototype.untilSunday = function() {
     return this.untilDay(0);
-}
+};
 
 Date.prototype.prevMonday = function() {
     return this.untilPrevDay(1);
-}
+};
 
 // "next" *excludes* the current day
 Date.prototype.nextFriday = function() {
     return this.nextDay().untilDay(5);
-}
+};
 
 
 // Models
 function Payroll(middleDate) {
-    this.middleDate = middleDate,
-    this.start = this._start(),
-    this.end = this._end()
-    this.payday = this._payday()
+    this.middleDate = middleDate;
+    this.start = this._start();
+    this.end = this._end();
+    this.payday = this._payday();
 }
 
-const specialCases = [
-    {
-        "start": new Date(2021, 2, 20),
-        "end": new Date(2021, 2, 31),
-        "payday": new Date(2021, 2, 31),
+let calendarSettings = {
+    "bigbear": {
+        "name": "BigBear",
+        "specialCases": [
+            {
+                "start": new Date(2021, 2, 20),
+                "end": new Date(2021, 2, 31),
+                "payday": new Date(2021, 2, 31),
+            },
+            {
+                "start": new Date(2021, 3, 1),
+                "end": new Date(2021, 3, 7),
+                "payday": new Date(2021, 3, 12),
+            },
+            {
+                "start": new Date(2021, 3, 8),
+                "end": new Date(2021, 3, 15),
+                "payday": new Date(2021, 3, 22),
+            },
+        ],
+        "offsetOffFriday": false,
+        "holidays": new Map([
+        [new Date(2021, 0, 1),    {"name": "New Year's Day"}],
+        [new Date(2021, 0, 18),   {"name": "Martin Luther King, Jr. Day"}],
+        [new Date(2021, 1, 15),   {"name": "Washington's Birthday"}],
+        [new Date(2021, 4, 31),   {"name": "Memorial Day"}],
+        [new Date(2021, 6, 5),    {"name": "Independence Day"}],
+        [new Date(2021, 8, 6),    {"name": "Labor Day"}],
+        [new Date(2021, 9, 11),   {"name": "Indigenous Peoples' Day"}],
+        [new Date(2021, 10, 11),  {"name": "Veteran's Day"}],
+        [new Date(2021, 10, 25),  {"name": "Thanksgiving Day"}],
+        [new Date(2021, 11, 24),  {"name": "Christmas Day"}],
+        [new Date(2021, 11, 31),  {"name": "New Year's Day"}],
+        [new Date(2022, 0, 17),   {"name": "Martin Luther King Day"}],
+        [new Date(2022, 1, 21),   {"name": "President's Day"}],
+        [new Date(2022, 4, 30),   {"name": "Memorial Day"}],
+        [new Date(2022, 5, 20),   {"name": "Juneteenth"}],
+        [new Date(2022, 6, 4),    {"name": "Independence Day"}],
+        [new Date(2022, 8, 5),    {"name": "Labor Day"}],
+        [new Date(2022, 9, 10),   {"name": "Indigenous Peoples' Day"}],
+        [new Date(2022, 10, 11),  {"name": "Veteran's Day"}],
+        [new Date(2022, 10, 24),  {"name": "Thanksgiving"}],
+        [new Date(2022, 11, 26),  {"name": "Christmas Day"}],
+        [new Date(2023, 0, 2),    {"name": "New Year's Day"}],
+        [new Date(2023, 0, 16),   {"name": "Martin Luther King Day"}],
+        [new Date(2023, 1, 20),   {"name": "President's Day"}],
+        [new Date(2023, 4, 29),   {"name": "Memorial Day"}],
+        [new Date(2023, 5, 19),   {"name": "Juneteenth"}],
+        [new Date(2023, 6, 4),    {"name": "Independence Day"}],
+        [new Date(2023, 8, 4),    {"name": "Labor Day"}],
+        [new Date(2023, 9, 9),    {"name": "Indigenous Peoples' Day"}],
+        [new Date(2023, 10, 10),  {"name": "Veteran's Day"}],
+        [new Date(2023, 10, 23),  {"name": "Thanksgiving"}],
+        [new Date(2023, 11, 25),  {"name": "Christmas Day"}],
+    ].map(([d, v]) => [d.toDateString(), v]))
     },
-    {
-        "start": new Date(2021, 3, 1),
-        "end": new Date(2021, 3, 7),
-        "payday": new Date(2021, 3, 12),
-    },
-    {
-        "start": new Date(2021, 3, 8),
-        "end": new Date(2021, 3, 15),
-        "payday": new Date(2021, 3, 22),
-    },
-]
+    "epochgeo": {
+        "name": "EpochGeo",
+        "specialCases": [],
+        "offsetOffFriday": true,
+        "holidays": new Map([
+            [new Date(2023, 0, 2),    {"name": "New Year's Day"}],
+            [new Date(2023, 0, 16),   {"name": "MLK Day"}],
+            [new Date(2023, 1, 20),   {"name": "President's Day"}],
+            [new Date(2023, 4, 29),   {"name": "Memorial Day"}],
+            [new Date(2023, 5, 19),   {"name": "Juneteenth"}],
+            [new Date(2023, 6, 4),    {"name": "Independence Day"}],
+            [new Date(2023, 8, 4),    {"name": "Labor Day"}],
+            [new Date(2023, 9, 9),    {"name": "Indigenous Peoples' Day"}],
+            [new Date(2023, 10, 10),  {"name": "Veteran's Day"}],
+            [new Date(2023, 10, 23),  {"name": "Thanksgiving Day"}],
+            [new Date(2023, 10, 24),  {"name": "EpochGeo Holiday"}],
+            [new Date(2023, 11, 22),  {"name": "EpochGeo Holiday"}],
+            [new Date(2023, 11, 25),  {"name": "Christmas Day"}],
+            [new Date(2023, 11, 29),  {"name": "EpochGeo Holiday (NYE)"}],
+        ].map(([d, v]) => [d.toDateString(), v]))
+    }
+}
+
+const profile = determineProfile();
+
+const specialCases = calendarSettings[profile].specialCases;
 
 Payroll.prototype._start = function() {
     const d = this.middleDate;
@@ -453,7 +543,7 @@ Payroll.prototype._start = function() {
     const day = d.getDate();
     const start = day < 16 ? 1 : 16;
     return new Date(year, month, start);
-}
+};
 
 Payroll.prototype._end = function() {
     const d = this.middleDate;
@@ -470,7 +560,7 @@ Payroll.prototype._end = function() {
             new Date(year, month, 15) :
             new Date(year, month+1, 0);
     return end;
-}
+};
 
 Payroll.prototype._payday = function() {
     const d = this.middleDate;
@@ -491,19 +581,19 @@ Payroll.prototype._payday = function() {
     } else {
         throw `startDay (${startDay}) is not 1 or 16`;
     }
-}
+};
 
 Payroll.prototype.nextPayroll = function() {
     return new Payroll(this.end.nextDay());
-}
+};
 
 Payroll.prototype.iterNextPayrolls = function* () {
-    payroll = this.nextPayroll();
+    let payroll = this.nextPayroll();
     while (true) {
         yield payroll;
         payroll = payroll.nextPayroll();
     }
-}
+};
 
 Payroll.prototype.stats = function() {
     const stats = {
@@ -535,42 +625,9 @@ Payroll.prototype.stats = function() {
         i.advance();
     }
     return stats;
-}
+};
 
-const holidays = new Map([
-    [new Date(2021, 0, 1),    {"name": "New Year's Day"}],
-    [new Date(2021, 0, 18),   {"name": "Martin Luther King, Jr. Day"}],
-    [new Date(2021, 1, 15),   {"name": "Washington's Birthday"}],
-    [new Date(2021, 4, 31),   {"name": "Memorial Day"}],
-    [new Date(2021, 6, 5),    {"name": "Independence Day"}],
-    [new Date(2021, 8, 6),    {"name": "Labor Day"}],
-    [new Date(2021, 9, 11),   {"name": "Indigenous Peoples' Day"}],
-    [new Date(2021, 10, 11),  {"name": "Veteran's Day"}],
-    [new Date(2021, 10, 25),  {"name": "Thanksgiving Day"}],
-    [new Date(2021, 11, 24),  {"name": "Christmas Day"}],
-    [new Date(2021, 11, 31),  {"name": "New Year's Day"}],
-    [new Date(2022, 0, 17),   {"name": "Martin Luther King Day"}],
-    [new Date(2022, 1, 21),   {"name": "President's Day"}],
-    [new Date(2022, 4, 30),   {"name": "Memorial Day"}],
-    [new Date(2022, 5, 20),   {"name": "Juneteenth"}],
-    [new Date(2022, 6, 4),    {"name": "Independence Day"}],
-    [new Date(2022, 8, 5),    {"name": "Labor Day"}],
-    [new Date(2022, 9, 10),   {"name": "Indigenous Peoples' Day"}],
-    [new Date(2022, 10, 11),  {"name": "Veteran's Day"}],
-    [new Date(2022, 10, 24),  {"name": "Thanksgiving"}],
-    [new Date(2022, 11, 26),  {"name": "Christmas Day"}],
-    [new Date(2023, 0, 2),    {"name": "New Year's Day"}],
-    [new Date(2023, 0, 16),   {"name": "Martin Luther King Day"}],
-    [new Date(2023, 1, 20),   {"name": "President's Day"}],
-    [new Date(2023, 4, 29),   {"name": "Memorial Day"}],
-    [new Date(2023, 5, 19),   {"name": "Juneteenth"}],
-    [new Date(2023, 6, 4),    {"name": "Independence Day"}],
-    [new Date(2023, 8, 4),    {"name": "Labor Day"}],
-    [new Date(2023, 9, 9),    {"name": "Indigenous Peoples' Day"}],
-    [new Date(2023, 10, 10),  {"name": "Veteran's Day"}],
-    [new Date(2023, 10, 23),  {"name": "Thanksgiving"}],
-    [new Date(2023, 11, 25),  {"name": "Christmas Day"}],
-].map(([d, v]) => [d.toDateString(), v]));
+const holidays = calendarSettings[profile].holidays;
 
 function isHoliday(d) {
     return holidays.has(d.toDateString());
@@ -608,9 +665,12 @@ function isFriday(d) {
     return d.getDay() === 5;
 }
 
+const offsetOffFriday = calendarSettings[profile].offsetOffFriday;
+
 function isOffFriday(d) {
     const anOffFriday = new Date(2021, 1, 19);
-    return d.daysUntil(anOffFriday) % 14 === 0;
+    const offset = offsetOffFriday ? 7 : 0;
+    return (d.daysUntil(anOffFriday) + offset) % 14 === 0;
 }
 
 function isToday(d) {
@@ -741,7 +801,7 @@ function drawSummary(root, payroll) {
     summary.appendChild(period(payroll));
     summary.appendChild(stats(payroll));
     root.appendChild(summary);
-};
+}
 
 function drawPayPeriod(root, payroll, options={}) {
     const weekStart = payroll.start.prevMonday();
@@ -890,6 +950,14 @@ window.addEventListener("hashchange", function () {
     calendar.innerHTML = "";
     drawCalendar(calendar);
 });
+
+// adjust the title
+const title = document.getElementById("page-title");
+title.textContent = calendarSettings[profile].name + " " + title.textContent;
+// TODO: how to improve this?  Avoid hard-coding and support more than two options.
+const otherProfile = profile === "bigbear" ? "epochgeo" : "bigbear";
+title.href = `/${otherProfile}/`;
+title.title = `Click to switch to ${otherProfile} calendar.`;
 
 drawCalendar(calendar);
     </script>

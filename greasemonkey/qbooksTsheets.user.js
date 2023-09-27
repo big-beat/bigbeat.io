@@ -1,26 +1,17 @@
 // ==UserScript==
-// @name        Timesheet++ - unanet.biz
+// @name        Timesheet++ - tsheets.intuit.com
 // @namespace   https://github.com/big-beat/
-// @match       https://pci-sm.unanet.biz/pci-sm/action/time/edit
-// @grant       none
-// @version     1.9
+// @match       https://tsheets.intuit.com/
+// @grant       GM_addStyle
+// @version     1.0
 // @author      jrib
 // @description Display hours remaining in the pay period.
 // ==/UserScript==
 //
 // Changelog
 // * 1.0: Initial release.
-// * 1.1: Use workHours + holidayHours when calculating remaining hours.
-// * 1.2: No change.  Testing greasemonkey update behavior.
-// * 1.3: Recalculate hours on input blur.
-// * 1.4: Update 2021 Christmas holiday to 2021-12-24.
-// * 1.5: (greasemonkey branch only): Add note that script has moved to master.
-// * 1.6: Remove link to master branch.
-// * 1.7: Calendar library API improvements.  No functional changes.
-// * 1.8: Update 2023 holidays
-// * 1.9: Support company profiles
 
-(function() {
+(async function () {
 // start copied calendar code
 // start shared calendar code
 // this code is copied from index.html to the greasemonkey extension by `scripts/sync-calendar-code`
@@ -322,49 +313,137 @@ function isBeforeToday(d) {
 // end copied calendar code
 
 function determineProfile() {
-    return "bigbear";
+    return "epochgeo";
 }
 
-window.addEventListener ("load", Greasemonkey_main, false);
-
-function Greasemonkey_main () {
-    // our global to avoid conflicts
-    var bigBeat = window.bigBeat = {};
-
-    // update hours remaining being displayed
-    bigBeat.updateHoursRemaining = function() {
-        var payPeriod = new Payroll(dates[0]).stats();
-
-        var hoursNeeded = payPeriod.workHours + payPeriod.holidayHours;
-        var hoursEntered = tconfig.getGridTotalF();
-        var hoursRemaining = hoursNeeded - hoursEntered ;
-
-        var hoursEl = document.querySelector("#bigbeat-hours-remaining");
-        // TODO: link to bigbeat but fix styling
-        //hoursEl.innerHTML = "[hours remaining: <a target='_blank' href='https://bigbeat.io'>" + hoursRemaining + "</a>]";
-        hoursEl.innerHTML = "[hours remaining: " + hoursRemaining + "]";
-    }
-
-    /*
-     * We rely on two globals currently:
-     *     - tconfig: to access the function to compute entered total
-     *     - dates: to know what pay-period we are in
-     */
-    if (!tconfig) {
-        throw 'tconfig is an expected global but it is not defined! Open an issue at https://github.com/big-beat/bigbeat.io/issues/new/choose .';
-    } else if (!dates[0]) {
-        throw 'dates[0] is an expected global but it is not defined! Open an issue at https://github.com/big-beat/bigbeat.io/issues/new/choose .';
-    } else {
-        // create the element to display the hours remaining
-        var hoursEl = document.createElement("span");
-        hoursEl.id = 'bigbeat-hours-remaining';
-        document.querySelector("#page-title-cont #page-title").appendChild(hoursEl);
-        bigBeat.updateHoursRemaining();
-
-        // update hours remaining on input blur
-        document.querySelectorAll("input.hours").forEach(function(e) {
-            e.setAttribute('onblur',  e.getAttribute('onblur') + '; bigBeat.updateHoursRemaining();');
+// wait for selector to appear in the dom
+// if filter is given, then only resolve if filter(matchedElement) is truthy
+function waitFor(selector, filter) {
+    return new Promise(resolve => {
+        const observer = new MutationObserver(mutations => {
+            const elt = document.querySelector(selector);
+            if (elt) {
+                if (filter && !filter(elt)) {
+                    return;
+                }
+                resolve(elt);
+                observer.disconnect();
+            }
         });
-    }
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    });
 }
+
+async function Greasemonkey_main() {
+    //  We rely on two globals currently:
+    //      - vars: to determine the user's Id
+    //      - xajax: to make requests for the user's hours
+    if (typeof(vars) === 'undefined') {
+        throw 'vars is an expected global but it is not defined! Open an issue at https://github.com/big-beat/bigbeat.io/issues/new/choose .';
+    }
+    if (typeof(xajax) === 'undefined') {
+        throw 'xajax is an expected global but it is not defined! Open an issue at https://github.com/big-beat/bigbeat.io/issues/new/choose .';
+    }
+
+    function formatDate(d) {
+        const year = d.getFullYear();
+        const month = (1 + d.getMonth()).toString().padStart(2, "0");
+        const day = d.getDate().toString().padStart(2, "0");
+        return `${year}-${month}-${day}`;
+    }
+
+    // Create the element to display the hours remaining.
+    const css = `
+        #bigbeat-hours-remaining p {
+            margin: 0;
+        }
+    `;
+    GM_addStyle(css);
+    const hoursEl = document.createElement("div");
+    const clock = document.querySelector("#clock_wrapper");
+    hoursEl.id = "bigbeat-hours-remaining";
+    document.querySelector("#box_top").insertBefore(hoursEl, clock);
+
+    // Gather data to request informatino for current pay period.
+    const payPeriod = new Payroll(new Date());
+    const start = formatDate(payPeriod.start);
+    const end = formatDate(payPeriod.end);
+    const userId = vars.user_id;
+    const windowName = "timesheet_list_v2";
+
+    function renderHoursDisplay(hoursLeft, hoursWorked, hoursNeeded, holidayHours) {
+        const holidayNote = holidayHours ? ` (${holidayHours} holiday hours)` : "";
+        return `<p>${hoursWorked} hours entered of ${hoursNeeded} hours needed${holidayNote}.</p>
+                <p><strong>Hours remaining:</strong> ${hoursLeft}.</p>`;
+    }
+
+    // Make a network request to fetch the hours saved for the current pay period and update hours remaining.
+    function updateHours() {
+        try {
+            xajax.json_post(
+                windowName,
+                "get_data_for_date_range",
+                {
+                    user_ids: [userId],
+                    start,
+                    end,
+                    days_to_load: start,
+                    per_page: 50,
+                    sort: { column: "Time in - out", ascending: false },
+                },
+                {
+                    error: function (e) {
+                        console.error(e);
+                        hoursEl.innerHTML = "[Something went wrong :(]";
+                    },
+                    success: function (result) {
+                        const secondsWorked = result.days.reduce(
+                            (sum, day) => (sum += day.total),
+                            0
+                        );
+                        const hoursWorked = secondsWorked / 60 / 60;
+
+                        const stats = payPeriod.stats();
+                        const hoursNeeded = stats.workHours + stats.holidayHours;
+                        const hoursLeft = hoursNeeded - hoursWorked;
+                        console.log(`Updating hours to ${hoursLeft}.`);
+                        hoursEl.innerHTML = renderHoursDisplay(hoursLeft, hoursWorked, hoursNeeded, stats.holidayHours);
+                    },
+                }
+            );
+        } catch (e) {
+            console.error(e);
+            hoursEl.innerHTML = "[Something went wrong :(]";
+        }
+    }
+
+    // Update hours as soon as we load.
+    updateHours();
+
+    // Trigger an update when both:
+    //    1. changes are saved (detect snackbar) AND
+    //    2. the total hours for this week changed
+    let last = null;
+    async function waitForSnackbar() {
+        const snackTextOnSave = "Changes saved successfully";
+        const snackbarRole = '[role="alert"]';
+
+        await waitFor(snackbarRole, snack => snackTextOnSave === snack.textContent);
+        const now = document.getElementById("weekly_timecard_weekly_grand_total").value;
+        if (last !== now) {
+            last = now;
+            updateHours();
+        }
+    }
+
+    // Wait for the save button and subscribe to its click events.
+    const saveButtonSelector = "#weekly_timecard_submit_button";
+    const saveButton = await waitFor(saveButtonSelector);
+    saveButton.addEventListener("click", waitForSnackbar);
+}
+
+window.addEventListener("load", Greasemonkey_main, false);
 })();

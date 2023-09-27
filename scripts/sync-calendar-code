@@ -9,12 +9,17 @@ match_start="// start shared calendar code"
 match_end="// end shared calendar code"
 
 # target details
-greasemonkey_script="greasemonkey/timesheet.user.js"
+greasemonkey_scripts=(
+    "greasemonkey/timesheet.user.js"
+    "greasemonkey/qbooksTsheets.user.js"
+)
 replace_start="// start copied calendar code"
 replace_end="// end copied calendar code"
 
-# delete existing copied code
-sed -i "\\#$replace_start#,\\#$replace_end#{//!d}" "$greasemonkey_script"
+for greasemonkey_script in "${greasemonkey_scripts[@]}"; do
+    # delete existing copied code
+    sed -i "\\#$replace_start#,\\#$replace_end#{//!d}" "$greasemonkey_script"
 
-# insert what is in index.html
-sed -i "\\#$replace_start#r"<(sed -n "\\#$match_start#,\\#$match_end#p" "$index") "$greasemonkey_script"
+    # insert what is in index.html
+    sed -i "\\#$replace_start#r"<(sed -n "\\#$match_start#,\\#$match_end#p" "$index") "$greasemonkey_script"
+done
