@@ -3,7 +3,7 @@
 // @namespace   https://github.com/big-beat/
 // @match       https://pci-sm.unanet.biz/pci-sm/action/time/edit
 // @grant       none
-// @version     1.9
+// @version     1.10
 // @author      jrib
 // @description Display hours remaining in the pay period.
 // ==/UserScript==
@@ -19,6 +19,7 @@
 // * 1.7: Calendar library API improvements.  No functional changes.
 // * 1.8: Update 2023 holidays
 // * 1.9: Support company profiles
+// * 1.10: Update 2024 holidays
 
 (function() {
 // start copied calendar code
@@ -107,27 +108,6 @@ let calendarSettings = {
         ],
         "offsetOffFriday": false,
         "holidays": new Map([
-        [new Date(2021, 0, 1),    {"name": "New Year's Day"}],
-        [new Date(2021, 0, 18),   {"name": "Martin Luther King, Jr. Day"}],
-        [new Date(2021, 1, 15),   {"name": "Washington's Birthday"}],
-        [new Date(2021, 4, 31),   {"name": "Memorial Day"}],
-        [new Date(2021, 6, 5),    {"name": "Independence Day"}],
-        [new Date(2021, 8, 6),    {"name": "Labor Day"}],
-        [new Date(2021, 9, 11),   {"name": "Indigenous Peoples' Day"}],
-        [new Date(2021, 10, 11),  {"name": "Veteran's Day"}],
-        [new Date(2021, 10, 25),  {"name": "Thanksgiving Day"}],
-        [new Date(2021, 11, 24),  {"name": "Christmas Day"}],
-        [new Date(2021, 11, 31),  {"name": "New Year's Day"}],
-        [new Date(2022, 0, 17),   {"name": "Martin Luther King Day"}],
-        [new Date(2022, 1, 21),   {"name": "President's Day"}],
-        [new Date(2022, 4, 30),   {"name": "Memorial Day"}],
-        [new Date(2022, 5, 20),   {"name": "Juneteenth"}],
-        [new Date(2022, 6, 4),    {"name": "Independence Day"}],
-        [new Date(2022, 8, 5),    {"name": "Labor Day"}],
-        [new Date(2022, 9, 10),   {"name": "Indigenous Peoples' Day"}],
-        [new Date(2022, 10, 11),  {"name": "Veteran's Day"}],
-        [new Date(2022, 10, 24),  {"name": "Thanksgiving"}],
-        [new Date(2022, 11, 26),  {"name": "Christmas Day"}],
         [new Date(2023, 0, 2),    {"name": "New Year's Day"}],
         [new Date(2023, 0, 16),   {"name": "Martin Luther King Day"}],
         [new Date(2023, 1, 20),   {"name": "President's Day"}],
@@ -139,6 +119,17 @@ let calendarSettings = {
         [new Date(2023, 10, 10),  {"name": "Veteran's Day"}],
         [new Date(2023, 10, 23),  {"name": "Thanksgiving"}],
         [new Date(2023, 11, 25),  {"name": "Christmas Day"}],
+        [new Date(2024, 0, 1),    {"name": "New Year's Day"}],
+        [new Date(2024, 0, 15),   {"name": "Martin Luther King Day"}],
+        [new Date(2024, 1, 19),   {"name": "President's Day"}],
+        [new Date(2024, 4, 27),   {"name": "Memorial Day"}],
+        [new Date(2024, 5, 19),   {"name": "Juneteenth"}],
+        [new Date(2024, 6, 4),    {"name": "Independence Day"}],
+        [new Date(2024, 8, 2),    {"name": "Labor Day"}],
+        [new Date(2024, 9, 14),   {"name": "Indigenous Peoples' Day"}],
+        [new Date(2024, 10, 11),  {"name": "Veteran's Day"}],
+        [new Date(2024, 10, 28),  {"name": "Thanksgiving"}],
+        [new Date(2024, 11, 25),  {"name": "Christmas Day"}],
     ].map(([d, v]) => [d.toDateString(), v]))
     },
     "epochgeo": {
