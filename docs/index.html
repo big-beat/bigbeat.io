@@ -868,7 +868,7 @@ function drawCalendar(rootNode) {
     let payroll = new Payroll(startDate);
     drawPayPeriod(rootNode, payroll, {forceDrawMonth: true});
     for (let p of payroll.iterNextPayrolls()) {
-        // we do not have holidays defined past 2023
+        // we do not have holidays defined past 2024
         if (p.start.getFullYear() > 2024) {
             break;
         }
