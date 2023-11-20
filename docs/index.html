@@ -831,7 +831,7 @@ function urlHash() {
     }, {});
 }
 
-const payrollSwitchDate = new Date(2021, 2, 20);
+const calendarStartDate = new Date(holidays.keys().next().value);
 
 function drawCalendar(rootNode) {
     const hash = urlHash();
@@ -855,7 +855,7 @@ function drawCalendar(rootNode) {
         startDate = today;
 
         // draw the arrow collapsed
-        calAction.innerHTML = `<a href="#startDate=${payrollSwitchDate.toJSON()}">
+        calAction.innerHTML = `<a href="#startDate=${calendarStartDate.toJSON()}">
             <svg class="icon">
                 <title>Show history</title>
                 <use href="#chevron-left"></use>
@@ -863,13 +863,14 @@ function drawCalendar(rootNode) {
         </a>`;
     }
 
-    startDate = startDate >= payrollSwitchDate ? startDate : payrollSwitchDate;
+    startDate = startDate >= calendarStartDate ? startDate : calendarStartDate;
+    const endYear = Math.max(...Array.from(holidays.keys(), d => new Date(d).getFullYear()));
 
     let payroll = new Payroll(startDate);
     drawPayPeriod(rootNode, payroll, {forceDrawMonth: true});
     for (let p of payroll.iterNextPayrolls()) {
         // we do not have holidays defined past 2024
-        if (p.start.getFullYear() > 2024) {
+        if (p.start.getFullYear() > endYear) {
             break;
         }
         drawPayPeriod(rootNode, p);
