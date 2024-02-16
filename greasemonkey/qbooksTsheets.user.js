@@ -3,13 +3,14 @@
 // @namespace   https://github.com/big-beat/
 // @match       https://tsheets.intuit.com/
 // @grant       GM_addStyle
-// @version     1.0
+// @version     1.1
 // @author      jrib
 // @description Display hours remaining in the pay period.
 // ==/UserScript==
 //
 // Changelog
 // * 1.0: Initial release.
+// * 1.1: Bump for holidays.
 
 (async function () {
 // start copied calendar code
