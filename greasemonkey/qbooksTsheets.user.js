@@ -132,7 +132,7 @@ let calendarSettings = {
             [new Date(2025, 9, 13),   {"name": "Indigenous Peoples' Day"}],
             [new Date(2025, 10, 11),  {"name": "Veterans Day"}],
             [new Date(2025, 10, 27),  {"name": "Thanksgiving"}],
-            [new Date(2025, 11, 25),  {"name": "Christmas Day"}],
+            [new Date(2025, 11, 25),  {"name": "Christmas Day"}]
         ].map(([d, v]) => [d.toDateString(), v]))
     },
     "epochgeo": {
