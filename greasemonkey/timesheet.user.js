@@ -130,6 +130,17 @@ let calendarSettings = {
             [new Date(2024, 10, 11),  {"name": "Veterans Day"}],
             [new Date(2024, 10, 28),  {"name": "Thanksgiving"}],
             [new Date(2024, 11, 25),  {"name": "Christmas Day"}],
+            [new Date(2025, 0, 1),    {"name": "New Year's Day"}],
+            [new Date(2025, 0, 20),   {"name": "Martin Luther King Jr. Day"}],
+            [new Date(2025, 1, 17),   {"name": "President's Day"}],
+            [new Date(2025, 4, 26),   {"name": "Memorial Day"}],
+            [new Date(2025, 5, 19),   {"name": "Juneteenth"}],
+            [new Date(2025, 6, 4),    {"name": "Independence Day"}],
+            [new Date(2025, 8, 1),    {"name": "Labor Day"}],
+            [new Date(2025, 9, 13),   {"name": "Indigenous Peoples' Day"}],
+            [new Date(2025, 10, 11),  {"name": "Veterans Day"}],
+            [new Date(2025, 10, 27),  {"name": "Thanksgiving"}],
+            [new Date(2025, 11, 25),  {"name": "Christmas Day"}]
         ].map(([d, v]) => [d.toDateString(), v]))
     },
     "epochgeo": {
