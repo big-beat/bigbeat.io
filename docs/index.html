@@ -31,6 +31,7 @@
             --context-background-color: #f0f0f0;
             --github-ribbon-color: #fff;
             --github-ribbon-background-color: #121621;
+            --shadow-color: rgba(0, 0, 0, 0.2);
         }
 
         :root[data-theme='dark'] {
@@ -43,6 +44,7 @@
             --context-background-color: #191919;
             --github-ribbon-color: #000;
             --github-ribbon-background-color: #ccc;
+            --shadow-color: rgba(255, 255, 255, 0.2);
         }
         :root[data-theme="light"] .light-hidden {
             display: none;
@@ -62,6 +64,36 @@
             font-family: monospace;
             margin: 0;
             transition: color .2s ease-in, background-color .2s ease-in;
+        }
+
+        .notification-banner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 15px;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px var(--shadow-color);
+        }
+
+        .notification-banner p {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .notification-banner a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        @media (max-width: 600px) {
+            .notification-banner p {
+                font-size: 12px;
+            }
         }
 
         header {
@@ -368,7 +400,10 @@ function determineProfile() {
     const defaultProfile = "bigbear";  // first mover advantage!
 
     // if the url is set, use that
-    const urlProfile = window.location.pathname.replaceAll('/', '').toLowerCase();
+    const pathParts = window.location.pathname.toLowerCase().split('/');
+    const redirected = pathParts.includes("redirected");
+    const urlProfile = pathParts.filter(part => part !== "redirected").join('');
+
     if (urlProfile) {
         if (calendarSettings.hasOwnProperty(urlProfile)) {
             localStorage.setItem("profile", urlProfile);
@@ -380,7 +415,8 @@ function determineProfile() {
 
     // otherwise, check if a preference is stored in local storage or fall back to the default
     const newProfile = localStorage.getItem("profile") || defaultProfile;
-    history.replaceState(null, '', `/${newProfile}/`);
+    const newUrl = redirected ? `/redirected/${newProfile}/` : `/${newProfile}/`;
+    history.replaceState(null, '', newUrl);
     localStorage.setItem("profile", newProfile);
     return newProfile;
 }
@@ -967,7 +1003,31 @@ function disco() {
     });
 }
 
+function drawBanner() {
+    const pathParts = window.location.pathname.split('/');
+    const redirected = pathParts.includes("redirected");
+
+    if (!redirected) {
+        return;
+    }
+
+    const header = document.querySelector("header");
+
+    const banner = document.createElement("div");
+    banner.className = "notification-banner";
+
+    banner.innerHTML = `
+        <a href="https://github.com/big-beat/bigbeat.io/wiki/2025-Domain-Name-Change">
+            <p class="banner-message">⚠️ bigbeat.io is moving to bigbeat.jrib.net!</p>
+        </a>
+    `;
+
+    document.body.insertBefore(banner, header);
+}
+
 const app = document.getElementById("app");
+
+drawBanner();
 
 const legend = addDiv(app, "");
 legend.id = "legend";
@@ -984,7 +1044,6 @@ window.addEventListener("hashchange", function () {
 // adjust the title
 const title = document.getElementById("page-title");
 title.textContent = calendarSettings[profile].name + " " + title.textContent;
-// TODO: how to improve this?  Avoid hard-coding and support more than two options.
 const otherProfile = profile === "bigbear" ? "epochgeo" : "bigbear";
 title.href = `/${otherProfile}/`;
 title.title = `Click to switch to ${otherProfile} calendar.`;
